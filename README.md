@@ -16,6 +16,7 @@ To build and lex any file:
 
 
 # Homework 1 Components
+> Scroll Down to See Homework 2 Components and Deliverables.
 The main files for this part of the homework can be found in `/lexer/lexer.cpp` `/token/token.h` and `/test/lexer_test.cpp`
 ## Language Components
 KEYWORD = while | if | else | for | forn | 
@@ -43,5 +44,38 @@ Most of the time, the symbol type can be deduced from the first character, so it
 ## Shell Testing Scripts
 testing scripts are found in `/tests`
 
+# Homework 2 Components
+**Deliverables:**
+
+### CFG for language 
+```
+```
+
+### Parsing Algorithm 
+You can find our parsing algorithm in `./parser`.
+*How our Parsing algorithm works*
+- 
+
+### Sample Input Programs
+Our sample input programs can be found in `/test-files/parser_tests` The first 4 are different features and parsing nesting for force_pp. The last 
+test file is to show error handling and how we print that out to the user.
+
+Run the sample input programs through `bash ./run_tests.sh`. 
+- This just runs the two testing files so far, which are `lexer_tests.cpp` and `parser_tests.cpp`
+
+### Shell script 
+Make sure you have C++ 17 installed like earlier and then you can do the same installations steps. 
+
+To run tests on Linux/Mac:
+./run_tests.sh
+
+To build and lex any file:
+1. make main
+2. ./main file_name 
+
+### Demos 
+All demos for this language can be found in the `./demos` folder. 
+
 ##### References 
+
 Collection of popular macros in comp programming: https://gist.github.com/abinashmeher999/e5993d17e9d25227cbe3#file-comp_macros-h-L3
