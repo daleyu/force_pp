@@ -1,52 +1,32 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-// Include necessary libraries
-#include <stdbool.h>
+#include <vector>
+#include <string>
+#include <memory>
+#include "../token/token.h"
+#include "../lexer/lexer.h"
+#include "../ast/ast.h"
 
-// Define any constants
-#define MAX_TOKEN_LENGTH 100
+class Parser {
+public:
+    Parser(std::shared_ptr<Lexer> l);
+    std::vector<std::string> Errors() const;
+    std::unique_ptr<Program> ParseProgram();
 
-// Enum to represent different token types
-typedef enum {
-    TOKEN_TYPE_UNKNOWN,
-    TOKEN_TYPE_IDENTIFIER,
-    TOKEN_TYPE_NUMBER,
-    TOKEN_TYPE_OPERATOR,
-    TOKEN_TYPE_END
-} TokenType;
+private:
+    std::shared_ptr<Lexer> lexer;
+    Token curToken;
+    Token peekToken;
+    std::vector<std::string> errors;
 
-// Structure to represent a token
-typedef struct {
-    TokenType type;
-    char value[MAX_TOKEN_LENGTH];
-} Token;
-
-// Function declarations
-
-/**
- * Initializes the parser.
- * This could involve setting up necessary state or buffers.
- */
-void parser_init();
-
-/**
- * Takes input from a string or file and processes it.
- * @param input The input string to be parsed.
- * @return True on success, false on failure.
- */
-bool parse_input(const char* input);
-
-/**
- * Gets the next token from the input.
- * @param token Pointer to a Token structure where the next token will be stored.
- * @return True if a token was successfully retrieved, false if the end of input is reached.
- */
-bool get_next_token(Token* token);
-
-/**
- * Cleans up any resources used by the parser.
- */
-void parser_cleanup();
+    void peekError(TokenType t);
+    void nextToken();
+    bool curTokenIs(TokenType t) const;
+    bool peekTokenIs(TokenType t) const;
+    bool expectPeek(TokenType t);
+    std::unique_ptr<Statement> parseLetStatement();
+    std::unique_ptr<Statement> parseStatement();
+};
 
 #endif // PARSER_H

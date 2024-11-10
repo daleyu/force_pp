@@ -1,6 +1,10 @@
 #ifndef AST_H
 #define AST_H
 
+#include <vector>
+#include <memory>
+#include <string>
+
 typedef enum {
     NODE_TYPE_LITERAL,
     NODE_TYPE_VARIABLE,
@@ -47,6 +51,20 @@ typedef struct ASTNode {
             int argument_count;
         } function_call;
     } data;
+
+    // Add the missing members
+    NodeType nodeType;
+    std::string value;
+    std::vector<std::shared_ptr<ASTNode>> children;
+
+    // Constructors
+    ASTNode(NodeType type, const std::string& value) : type(type), value(value) {}
+    ASTNode(const std::string& value) : value(value) {}
+    ASTNode(const std::string& value, const std::string& name, const std::string& op, const std::string& left, const std::string& right) : value(value) {
+        data.binary_op.left = new ASTNode(NODE_TYPE_VARIABLE, left);
+        data.binary_op.right = new ASTNode(NODE_TYPE_VARIABLE, right);
+        data.binary_op.op = op[0];
+    }
 } ASTNode;
 
 ASTNode *createLiteralNode(int intValue, double doubleValue, char charValue, const char *stringValue);

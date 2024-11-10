@@ -2,6 +2,7 @@ CXX = g++
 CXXFLAGS = -Wall -Werror -std=c++17
 LEXER_OBJ = lexer.o
 LEXER_TESTS_OBJ = lexer_tests.o
+PARSER_TESTS_OBJ = parser_tests.o
 EXECUTABLE = main
 
 # Rule to build the lexer object
@@ -12,9 +13,13 @@ $(LEXER_OBJ): lexer/lexer.cpp
 $(LEXER_TESTS_OBJ): tests/lexer_tests.cpp token/token.h 
 	$(CXX) $(CXXFLAGS) -c tests/lexer_tests.cpp -o $(LEXER_TESTS_OBJ)
 
+# Rule to build the parser_tests object
+$(PARSER_TESTS_OBJ): tests/parser_tests.cpp token/token.h
+	$(CXX) $(CXXFLAGS) -c tests/parser_tests.cpp -o $(PARSER_TESTS_OBJ)
+
 # Rule to link the executable
-run_tests: $(LEXER_OBJ) $(LEXER_TESTS_OBJ)
-	$(CXX) $(CXXFLAGS) $(LEXER_OBJ) $(LEXER_TESTS_OBJ) -o run_tests 
+run_tests: $(LEXER_OBJ) $(LEXER_TESTS_OBJ) $(PARSER_TESTS_OBJ)
+	$(CXX) $(CXXFLAGS) $(LEXER_OBJ) $(LEXER_TESTS_OBJ) $(PARSER_TESTS_OBJ) -o run_tests 
 
 main.o: main.cpp 
 	$(CXX) $(CXXFLAGS) -c main.cpp -o main.o
@@ -22,11 +27,9 @@ main.o: main.cpp
 main: main.o lexer.o
 	$(CXX) $(CXXFLAGS) $(LEXER_OBJ) main.o -o main
 
-
-
 # Rule for cleaning up compiled files
 clean:
-	rm -f $(EXECUTABLE) $(LEXER_OBJ) $(LEXER_TESTS_OBJ) *.o main run_tests
+	rm -f $(EXECUTABLE) $(LEXER_OBJ) $(LEXER_TESTS_OBJ) $(PARSER_TESTS_OBJ) *.o main run_tests
 
 # Default rule
 all: $(EXECUTABLE)
