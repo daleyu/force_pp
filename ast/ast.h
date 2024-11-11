@@ -31,14 +31,12 @@ typedef struct ASTNode {
             struct ASTNode *value;
         } variable;
 
-        // For binary operations like addition, subtraction, etc.
         struct {
             struct ASTNode *left;
             struct ASTNode *right;
             char op;
         } binary_op;
 
-        // For unary operations like negation, etc.
         struct {
             struct ASTNode *operand;
             char op;
@@ -52,7 +50,6 @@ typedef struct ASTNode {
         } function_call;
     } data;
 
-    // Add the missing members
     NodeType nodeType;
     std::string value;
     std::vector<std::shared_ptr<ASTNode>> children;
