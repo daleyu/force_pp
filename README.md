@@ -15,7 +15,7 @@ To build and lex any file:
 2. ./main file_name 
 
 
-# Homework 1 Components
+# Homework 1 Components (Tag v0.1-lexer)
 > Scroll Down to See Homework 2 Components and Deliverables.
 The main files for this part of the homework can be found in `/lexer/lexer.cpp` `/token/token.h` and `/test/lexer_test.cpp`
 ## Language Components
@@ -44,7 +44,7 @@ Most of the time, the symbol type can be deduced from the first character, so it
 ## Shell Testing Scripts
 testing scripts are found in `/tests`
 
-# Homework 2 Components
+# Homework 2 Components (Tag v0.2-parser)
 **Deliverables:**
 
 ### CFG for language 
