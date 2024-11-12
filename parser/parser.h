@@ -25,8 +25,18 @@ private:
     bool curTokenIs(TokenType t) const;
     bool peekTokenIs(TokenType t) const;
     bool expectPeek(TokenType t);
-    std::unique_ptr<Statement> parseLetStatement();
     std::unique_ptr<Statement> parseStatement();
+    // Add declarations for other parse functions
+    std::unique_ptr<Statement> parseVariableDeclaration();
+    std::unique_ptr<Statement> parseAssignmentStatement();
+    std::unique_ptr<Statement> parseExpressionStatement();
+    std::unique_ptr<Statement> parseForLoop();
+    std::unique_ptr<Statement> parseWhileLoop();
+    std::unique_ptr<Statement> parseIfStatement();
+    std::unique_ptr<Statement> parseReturnStatement();
+    std::unique_ptr<Block> parseBlock();
+    std::unique_ptr<Expression> parseExpression(int precedence = 0);
+    // ... Add more as needed
 };
 
 #endif // PARSER_H
