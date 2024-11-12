@@ -11,7 +11,18 @@
 void compareTokens(const std::vector<Token>& expected, const std::vector<Token>& actual) {
     assert(expected.size() == actual.size());
     for (size_t i = 0; i < expected.size(); ++i) {
+        if (expected[i].type != actual[i].type) {
+            std::cerr << "Token type mismatch at position " << i << ": expected "
+                      << TokenTypeToString(expected[i].type) << ", got "
+                      << TokenTypeToString(actual[i].type) << std::endl;
+        }
         assert(expected[i].type == actual[i].type);
+
+        if (expected[i].literal != actual[i].literal) {
+            std::cerr << "Token literal mismatch at position " << i << ": expected '"
+                      << expected[i].literal << "', got '"
+                      << actual[i].literal << "'" << std::endl;
+        }
         assert(expected[i].literal == actual[i].literal);
     }
 }
@@ -24,6 +35,7 @@ void test_program4();
 void test_program5();
 
 int main() {
+    std::cout << "Running Lexer Tests" << std::endl;
     test_program1();
     test_program2();
     test_program3();
@@ -34,15 +46,15 @@ int main() {
 }
 
 // Test Program 1
+// Test Program 1
 void test_program1() {
-    std::ifstream file("tests/test-files/lexer_test1.fpp");
+    std::ifstream file("tests/lexer_tests/lexer_test1.fpp");
     if (!file.is_open()) {
         std::cerr << "Error opening lexer_test1.fpp" << std::endl;
         return;
     }
     std::string program((std::istreambuf_iterator<char>(file)),
                         std::istreambuf_iterator<char>());
-
     file.close();
 
     // Initialize Lexer
@@ -50,33 +62,33 @@ void test_program1() {
 
     // Get tokens
     std::vector<Token> tokens;
-    Token tok = lexer.nextToken();
-    while (tok.type != "EOF") {
+    Token tok = lexer.NextToken();
+    while (tok.type != TokenType::EOF_TOKEN) {
         tokens.push_back(tok);
-        tok = lexer.nextToken();
+        tok = lexer.NextToken();
     }
     tokens.push_back(tok); // Add the EOF token
 
     // Expected tokens
     std::vector<Token> expectedTokens = {
-        Token("TYPE", "int"),
-        Token("IDENTIFIER", "x"),
-        Token("OPERATOR", "="),
-        Token("NUMBER", "7"),
-        Token("SYMBOL", ";"),
-        Token("TYPE", "int"),
-        Token("IDENTIFIER", "y"),
-        Token("OPERATOR", "="),
-        Token("NUMBER", "10"),
-        Token("SYMBOL", ";"),
-        Token("TYPE", "int"),
-        Token("IDENTIFIER", "result"),
-        Token("OPERATOR", "="),
-        Token("IDENTIFIER", "x"),
-        Token("OPERATOR", "+"),
-        Token("IDENTIFIER", "y"),
-        Token("SYMBOL", ";"),
-        Token("EOF", "")
+        Token(TokenType::INT, "int"),
+        Token(TokenType::IDENT, "x"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::INT_LITERAL, "7"),
+        Token(TokenType::SEMICOLON, ";"),
+        Token(TokenType::INT, "int"),
+        Token(TokenType::IDENT, "y"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::INT_LITERAL, "10"),
+        Token(TokenType::SEMICOLON, ";"),
+        Token(TokenType::INT, "int"),
+        Token(TokenType::IDENT, "result"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::IDENT, "x"),
+        Token(TokenType::PLUS, "+"),
+        Token(TokenType::IDENT, "y"),
+        Token(TokenType::SEMICOLON, ";"),
+        Token(TokenType::EOF_TOKEN, "")
     };
 
     compareTokens(expectedTokens, tokens);
@@ -86,7 +98,7 @@ void test_program1() {
 
 // Test Program 2
 void test_program2() {
-    std::ifstream file("tests/test-files/lexer_test2.fpp");
+    std::ifstream file("tests/lexer_tests/lexer_test2.fpp");
     if (!file.is_open()) {
         std::cerr << "Error opening lexer_test2.fpp" << std::endl;
         return;
@@ -96,37 +108,36 @@ void test_program2() {
     file.close();
     // Expected tokens
     std::vector<Token> expectedTokens = {
-        Token("TYPE", "int"),
-        Token("IDENTIFIER", "x"),
-        Token("OPERATOR", "="),
-        Token("NUMBER", "7"),
-        Token("SYMBOL", ";"),
-        Token("KEYWORD", "if"),
-        Token("SYMBOL", "("),
-        Token("IDENTIFIER", "x"),
-        Token("OPERATOR", "=="),
-        Token("NUMBER", "7"),
-        Token("SYMBOL", ")"),
-        Token("SYMBOL", "{"),
-        Token("IDENTIFIER", "x"),
-        Token("OPERATOR", "="),
-        Token("IDENTIFIER", "x"),
-        Token("OPERATOR", "-"),
-        Token("NUMBER", "1"),
-        Token("SYMBOL", ";"),
-        Token("SYMBOL", "}"),
-        Token("EOF", "")
+        Token(TokenType::INT, "int"),
+        Token(TokenType::IDENT, "x"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::INT_LITERAL, "7"),
+        Token(TokenType::SEMICOLON, ";"),
+        Token(TokenType::IF, "if"),
+        Token(TokenType::LPAREN, "("),
+        Token(TokenType::IDENT, "x"),
+        Token(TokenType::EQ, "=="), // You might need to add EQ to your TokenType enum if not present
+        Token(TokenType::INT_LITERAL, "7"),
+        Token(TokenType::RPAREN, ")"),
+        Token(TokenType::LBRACE, "{"),
+        Token(TokenType::IDENT, "x"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::IDENT, "x"),
+        Token(TokenType::MINUS, "-"),
+        Token(TokenType::INT_LITERAL, "1"),
+        Token(TokenType::SEMICOLON, ";"),
+        Token(TokenType::RBRACE, "}"),
+        Token(TokenType::EOF_TOKEN, "")
     };
-
 
     Lexer lexer(program);
 
     // Get tokens
     std::vector<Token> tokens;
-    Token tok = lexer.nextToken();
-    while (tok.type != "EOF") {
+    Token tok = lexer.NextToken();
+    while (tok.type != TokenType::EOF_TOKEN) {
         tokens.push_back(tok);
-        tok = lexer.nextToken();
+        tok = lexer.NextToken();
     }
     tokens.push_back(tok); // Add the EOF token
 
@@ -139,7 +150,7 @@ void test_program2() {
 // Test Program 3
 void test_program3() {
 
-    std::ifstream file("tests/test-files/lexer_test3.fpp");
+    std::ifstream file("tests/lexer_tests/lexer_test3.fpp");
     if (!file.is_open()) {
         std::cerr << "Error opening lexer_test3.fpp" << std::endl;
         return;
@@ -150,41 +161,41 @@ void test_program3() {
 
     // Expected tokens
     std::vector<Token> expectedTokens =  {
-        Token("TYPE", "int"),
-        Token("IDENTIFIER", "n"),
-        Token("OPERATOR", "="),
-        Token("NUMBER", "3"),
-        Token("SYMBOL", ";"),
-        Token("TYPE", "int"),
-        Token("IDENTIFIER", "result"),
-        Token("OPERATOR", "="),
-        Token("NUMBER", "1"),
-        Token("SYMBOL", ";"),
-        Token("KEYWORD", "forn"),
-        Token("SYMBOL", "("),
-        Token("IDENTIFIER", "i"),
-        Token("SYMBOL", ","),
-        Token("IDENTIFIER", "n"),
-        Token("SYMBOL", ")"),
-        Token("SYMBOL", "{"),
-        Token("IDENTIFIER", "result"),
-        Token("OPERATOR", "="),
-        Token("IDENTIFIER", "result"),
-        Token("OPERATOR", "*"),
-        Token("IDENTIFIER", "i"),
-        Token("SYMBOL", ";"),
-        Token("SYMBOL", "}"),
-        Token("EOF", "")
+        Token(TokenType::INT, "int"),
+        Token(TokenType::IDENT, "n"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::INT_LITERAL, "3"),
+        Token(TokenType::SEMICOLON, ";"),
+        Token(TokenType::INT, "int"),
+        Token(TokenType::IDENT, "result"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::INT_LITERAL, "1"),
+        Token(TokenType::SEMICOLON, ";"),
+        Token(TokenType::FOR, "forn"), // Assuming 'forn' is recognized as 'FOR' keyword
+        Token(TokenType::LPAREN, "("),
+        Token(TokenType::IDENT, "i"),
+        Token(TokenType::COMMA, ","),
+        Token(TokenType::IDENT, "n"),
+        Token(TokenType::RPAREN, ")"),
+        Token(TokenType::LBRACE, "{"),
+        Token(TokenType::IDENT, "result"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::IDENT, "result"),
+        Token(TokenType::ASTERISK, "*"),
+        Token(TokenType::IDENT, "i"),
+        Token(TokenType::SEMICOLON, ";"),
+        Token(TokenType::RBRACE, "}"),
+        Token(TokenType::EOF_TOKEN, "")
     };
 
     Lexer lexer(program);
 
     // Get tokens
     std::vector<Token> tokens;
-    Token tok = lexer.nextToken();
-    while (tok.type != "EOF") {
+    Token tok = lexer.NextToken();
+    while (tok.type != TokenType::EOF_TOKEN) {
         tokens.push_back(tok);
-        tok = lexer.nextToken();
+        tok = lexer.NextToken();
     }
     tokens.push_back(tok); // Add the EOF token
 
@@ -196,7 +207,7 @@ void test_program3() {
 
 // Test Program 4
 void test_program4() {
-    std::ifstream file("tests/test-files/lexer_test4.fpp");
+    std::ifstream file("tests/lexer_tests/lexer_test4.fpp");
     if (!file.is_open()) {
         std::cerr << "Error opening lexer_test4.fpp" << std::endl;
         return;
@@ -206,34 +217,34 @@ void test_program4() {
     file.close();
     // Expected tokens
     std::vector<Token> expectedTokens = {
-        Token("TYPE", "int"),
-        Token("IDENTIFIER", "y"),
-        Token("OPERATOR", "="),
-        Token("NUMBER", "10"),
-        Token("KEYWORD", "while"),
-        Token("SYMBOL", "("),
-        Token("IDENTIFIER", "y"),
-        Token("OPERATOR", ">"),
-        Token("NUMBER", "5"),
-        Token("SYMBOL", ")"),
-        Token("SYMBOL", "{"),
-        Token("IDENTIFIER", "y"),
-        Token("OPERATOR", "="),
-        Token("IDENTIFIER", "y"),
-        Token("OPERATOR", "-"),
-        Token("NUMBER", "1"),
-        Token("SYMBOL", "}"),
-        Token("EOF", "")
+        Token(TokenType::INT, "int"),
+        Token(TokenType::IDENT, "y"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::INT_LITERAL, "10"),
+        Token(TokenType::WHILE, "while"),
+        Token(TokenType::LPAREN, "("),
+        Token(TokenType::IDENT, "y"),
+        Token(TokenType::GT, ">"),
+        Token(TokenType::INT_LITERAL, "5"),
+        Token(TokenType::RPAREN, ")"),
+        Token(TokenType::LBRACE, "{"),
+        Token(TokenType::IDENT, "y"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::IDENT, "y"),
+        Token(TokenType::MINUS, "-"),
+        Token(TokenType::INT_LITERAL, "1"),
+        Token(TokenType::RBRACE, "}"),
+        Token(TokenType::EOF_TOKEN, "")
     };
 
     Lexer lexer(program);
 
     // Get tokens
     std::vector<Token> tokens;
-    Token tok = lexer.nextToken();
-    while (tok.type != "EOF") {
+    Token tok = lexer.NextToken();
+    while (tok.type != TokenType::EOF_TOKEN) {
         tokens.push_back(tok);
-        tok = lexer.nextToken();
+        tok = lexer.NextToken();
     }
     tokens.push_back(tok); // Add the EOF token
 
@@ -245,7 +256,7 @@ void test_program4() {
 
 // Test Program 5
 void test_program5() {
-    std::ifstream file("tests/test-files/lexer_test5.fpp");
+    std::ifstream file("tests/lexer_tests/lexer_test5.fpp");
     if (!file.is_open()) {
         std::cerr << "Error opening lexer_test5.fpp" << std::endl;
         return;
@@ -256,44 +267,44 @@ void test_program5() {
 
         // Expected tokens
     std::vector<Token> expectedTokens = {
-        Token("TYPE", "int"),
-        Token("IDENTIFIER", "y"),
-        Token("OPERATOR", "="),
-        Token("NUMBER", "5"),
-        Token("SYMBOL", ";"),
-        Token("TYPE", "int"),
-        Token("IDENTIFIER", "x"),
-        Token("OPERATOR", "="),
-        Token("NUMBER", "5"),
-        Token("SYMBOL", ";"),
-        Token("KEYWORD", "if"),
-        Token("SYMBOL", "("),
-        Token("IDENTIFIER", "y"),
-        Token("OPERATOR", "=="),
-        Token("IDENTIFIER", "x"),
-        Token("OPERATOR", "&&"),
-        Token("IDENTIFIER", "y"),
-        Token("OPERATOR", "=="),
-        Token("NUMBER", "5"),
-        Token("SYMBOL", ")"),
-        Token("SYMBOL", "{"),
-        Token("IDENTIFIER", "DBG"),
-        Token("SYMBOL", "("),
-        Token("IDENTIFIER", "y"),
-        Token("SYMBOL", ")"),
-        Token("SYMBOL", ";"),
-        Token("SYMBOL", "}"),
-        Token("EOF", "")
+        Token(TokenType::INT, "int"),
+        Token(TokenType::IDENT, "y"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::INT_LITERAL, "5"),
+        Token(TokenType::SEMICOLON, ";"),
+        Token(TokenType::INT, "int"),
+        Token(TokenType::IDENT, "x"),
+        Token(TokenType::ASSIGN, "="),
+        Token(TokenType::INT_LITERAL, "5"),
+        Token(TokenType::SEMICOLON, ";"),
+        Token(TokenType::IF, "if"),
+        Token(TokenType::LPAREN, "("),
+        Token(TokenType::IDENT, "y"),
+        Token(TokenType::EQ, "=="), 
+        Token(TokenType::IDENT, "x"),
+        Token(TokenType::AND, "&&"),
+        Token(TokenType::IDENT, "y"),
+        Token(TokenType::EQ, "=="),
+        Token(TokenType::INT_LITERAL, "5"),
+        Token(TokenType::RPAREN, ")"),
+        Token(TokenType::LBRACE, "{"),
+        Token(TokenType::IDENT, "DBG"), 
+        Token(TokenType::LPAREN, "("),
+        Token(TokenType::IDENT, "y"),
+        Token(TokenType::RPAREN, ")"),
+        Token(TokenType::SEMICOLON, ";"),
+        Token(TokenType::RBRACE, "}"),
+        Token(TokenType::EOF_TOKEN, "")
     };
 
     Lexer lexer(program);
 
     // Get tokens
     std::vector<Token> tokens;
-    Token tok = lexer.nextToken();
-    while (tok.type != "EOF") {
+    Token tok = lexer.NextToken();
+    while (tok.type != TokenType::EOF_TOKEN) {
         tokens.push_back(tok);
-        tok = lexer.nextToken();
+        tok = lexer.NextToken();
     }
     tokens.push_back(tok); // Add the EOF token
 

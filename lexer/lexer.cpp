@@ -1,14 +1,45 @@
+// lexer.cpp
 
 #include "lexer.h"
 #include <cctype>
-#include <iostream>
+#include <unordered_map>
 
-Lexer::Lexer(const std::string& input) : input(input), position(0), readPosition(0), ch(0) {
-    readChar();
+// Define keywords map
+std::unordered_map<std::string, TokenType> keywords = {
+    {"int", TokenType::INT},
+    {"float", TokenType::FLOAT},
+    {"char", TokenType::CHAR},
+    {"bool", TokenType::BOOL},
+    {"varchar", TokenType::VARCHAR},
+    {"vi", TokenType::VI},
+    {"void", TokenType::VOID},
+    {"for", TokenType::FOR},
+    {"forn", TokenType::FOR},
+    {"while", TokenType::WHILE},
+    {"if", TokenType::IF},
+    {"else", TokenType::ELSE},
+    {"return", TokenType::RETURN},
+    {"true", TokenType::TRUE},
+    {"false", TokenType::FALSE},
+    // Add other keywords as necessary
+};
+
+// Function to lookup identifiers and keywords
+TokenType LookupIdent(const std::string& ident) {
+    auto it = keywords.find(ident);
+    if (it != keywords.end()) {
+        return it->second;
+    }
+    return TokenType::IDENT;
 }
 
-void Lexer::readChar() {
-    if (readPosition >= (int)input.length()) {
+Lexer::Lexer(const std::string& input)
+    : input(input), position(0), readPosition(0), ch(0) {
+    ReadChar();
+}
+
+void Lexer::ReadChar() {
+    if (readPosition >= input.size()) {
         ch = 0;
     } else {
         ch = input[readPosition];
@@ -17,169 +48,183 @@ void Lexer::readChar() {
     readPosition++;
 }
 
-char Lexer::peekChar() {
-    if (readPosition >= (int)input.length()) {
+char Lexer::PeekChar() {
+    if (readPosition >= input.size()) {
         return 0;
     } else {
         return input[readPosition];
     }
 }
 
-std::string Lexer::readIdentifier() {
-    int startPosition = position;
-    while (isLetter(ch)) {
-        readChar();
-    }
-    return input.substr(startPosition, position - startPosition);
-}
-
-std::string Lexer::readNumber() {
-    int startPosition = position;
-    while (isDigit(ch)) {
-        readChar();
-    }
-    if(isLetter(ch)) return "";
-    return input.substr(startPosition, position - startPosition);
-}
-
-void Lexer::skipWhitespace() {
-    while (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r') {
-        readChar();
+void Lexer::SkipWhitespace() {
+    while (std::isspace(ch)) {
+        ReadChar();
     }
 }
 
-bool Lexer::isLetter(char ch) {
+bool Lexer::IsLetter(char ch) {
     return std::isalpha(ch) || ch == '_';
 }
 
-bool Lexer::isDigit(char ch) {
+bool Lexer::IsDigit(char ch) {
     return std::isdigit(ch);
 }
 
-std::string charToString(char ch) {
-    return std::string(1, ch);
+std::string Lexer::ReadIdentifier() {
+    size_t startPosition = position;
+    while (IsLetter(ch) || IsDigit(ch)) {
+        ReadChar();
+    }
+    return input.substr(startPosition, position - startPosition);
 }
 
-Token Lexer::newToken(std::string type, const std::string& literal) {
+std::string Lexer::ReadNumber() {
+    size_t startPosition = position;
+    while (IsDigit(ch)) {
+        ReadChar();
+    }
+    if (ch == '.') {
+        ReadChar(); // Consume '.'
+        while (IsDigit(ch)) {
+            ReadChar();
+        }
+    }
+    return input.substr(startPosition, position - startPosition);
+}
+
+Token Lexer::NewToken(TokenType type, const std::string& literal) {
     return Token(type, literal);
 }
 
-std::vector<std::string> types = {"int", "vector", "ll", "pair"};
-std::vector<std::string> keywords = {"while", "if", "else", "for", "forn"};
+Token Lexer::NextToken() {
+    Token tok(TokenType::ILLEGAL, "");
 
-// Function to lookup identifiers and keywords
-inline std::string LookupIdent(const std::string& ident) {
-    for(auto z : types) { 
-        if(z == ident) return "TYPE";
-    }
-    for(auto z : keywords) {
-        // std::cout << z << ' ' << ident << '\n';
-        if(z == ident) return "KEYWORD";
-    }
-    return "IDENTIFIER";
-}
+    SkipWhitespace();
 
-Token Lexer::nextToken() {
-    //create token to begin with with just random value
-    Token tok("ILLEGAL", "");
-    //we skip all the white space as possible like self loop
-    skipWhitespace();
     switch (ch) {
         case '=':
-            if (peekChar() == '=') {
+            if (PeekChar() == '=') {
                 char currentCh = ch;
-                readChar();
-                std::string literal = std::string(1, currentCh) + std::string(1, ch);
-                tok = newToken("OPERATOR", literal);
+                ReadChar();
+                std::string literal = std::string(1, currentCh) + ch;
+                tok = NewToken(TokenType::EQ, literal);
             } else {
-                tok = newToken("OPERATOR", charToString(ch));
-            }
-            break;
-        case '&':
-            if (peekChar() == '&') {
-                char currentCh = ch;
-                readChar();
-                std::string literal = std::string(1, currentCh) + std::string(1, ch);
-                tok = newToken("OPERATOR", literal);
-            } else {
-                tok = newToken("OPERATOR", charToString(ch));
-            }
-            break;
-        case '|':
-            if (peekChar() == '|') {
-                char currentCh = ch;
-                readChar();
-                std::string literal = std::string(1, currentCh) + std::string(1, ch);
-                tok = newToken("OPERATOR", literal);
-            } else {
-                tok = newToken("OPERATOR", charToString(ch));
+                tok = NewToken(TokenType::ASSIGN, std::string(1, ch));
             }
             break;
         case '+':
-            tok = newToken("OPERATOR", charToString(ch));
+            tok = NewToken(TokenType::PLUS, std::string(1, ch));
             break;
         case '-':
-            tok = newToken("OPERATOR", charToString(ch));
+            tok = NewToken(TokenType::MINUS, std::string(1, ch));
             break;
         case '!':
-            if (peekChar() == '=') {
+            if (PeekChar() == '=') {
                 char currentCh = ch;
-                readChar();
-                std::string literal = std::string(1, currentCh) + std::string(1, ch);
-                tok = Token{"OPERATOR", literal};
+                ReadChar();
+                std::string literal = std::string(1, currentCh) + ch;
+                tok = NewToken(TokenType::NOT_EQ, literal);
             } else {
-                tok = newToken("OPERATOR", charToString(ch));
+                tok = NewToken(TokenType::BANG, std::string(1, ch));
             }
             break;
         case '/':
-            tok = newToken("OPERATOR", charToString(ch));
+            tok = NewToken(TokenType::SLASH, std::string(1, ch));
             break;
         case '*':
-            tok = newToken("OPERATOR", charToString(ch));
+            tok = NewToken(TokenType::ASTERISK, std::string(1, ch));
             break;
         case '<':
-            tok = newToken("OPERATOR", charToString(ch));
+            if (PeekChar() == '=') {
+                char currentCh = ch;
+                ReadChar();
+                std::string literal = std::string(1, currentCh) + ch;
+                tok = NewToken(TokenType::LTE, literal);
+            } else {
+                tok = NewToken(TokenType::LT, std::string(1, ch));
+            }
             break;
         case '>':
-            tok = newToken("OPERATOR", charToString(ch));
+            if (PeekChar() == '=') {
+                char currentCh = ch;
+                ReadChar();
+                std::string literal = std::string(1, currentCh) + ch;
+                tok = NewToken(TokenType::GTE, literal);
+            } else {
+                tok = NewToken(TokenType::GT, std::string(1, ch));
+            }
+            break;
+        case '&':
+            if (PeekChar() == '&') {
+                char currentCh = ch;
+                ReadChar();
+                std::string literal = std::string(1, currentCh) + ch;
+                tok = NewToken(TokenType::AND, literal);
+            } else {
+                tok = NewToken(TokenType::ILLEGAL, std::string(1, ch));
+            }
+            break;
+        case '|':
+            if (PeekChar() == '|') {
+                char currentCh = ch;
+                ReadChar();
+                std::string literal = std::string(1, currentCh) + ch;
+                tok = NewToken(TokenType::OR, literal);
+            } else {
+                tok = NewToken(TokenType::ILLEGAL, std::string(1, ch));
+            }
             break;
         case ';':
-            tok = newToken("SYMBOL", charToString(ch));
-            break;
-        case '(':
-            tok = newToken("SYMBOL", charToString(ch));
-            break;
-        case ')':
-            tok = newToken("SYMBOL", charToString(ch));
+            tok = NewToken(TokenType::SEMICOLON, std::string(1, ch));
             break;
         case ',':
-            tok = newToken("SYMBOL", charToString(ch));
+            tok = NewToken(TokenType::COMMA, std::string(1, ch));
+            break;
+        case ':':
+            tok = NewToken(TokenType::COLON, std::string(1, ch));
+            break;
+        case '(':
+            tok = NewToken(TokenType::LPAREN, std::string(1, ch));
+            break;
+        case ')':
+            tok = NewToken(TokenType::RPAREN, std::string(1, ch));
             break;
         case '{':
-            tok = newToken("SYMBOL", charToString(ch));
+            tok = NewToken(TokenType::LBRACE, std::string(1, ch));
             break;
         case '}':
-            tok = newToken("SYMBOL", charToString(ch));
+            tok = NewToken(TokenType::RBRACE, std::string(1, ch));
+            break;
+        case '[':
+            tok = NewToken(TokenType::LBRACKET, std::string(1, ch));
+            break;
+        case ']':
+            tok = NewToken(TokenType::RBRACKET, std::string(1, ch));
             break;
         case 0:
+            tok.type = TokenType::EOF_TOKEN;
             tok.literal = "";
-            tok.type = "EOF";
             break;
         default:
-            if (isLetter(ch)) {
-                tok.literal = readIdentifier();
-                tok.type = LookupIdent(tok.literal);
-                return tok;
-            } else if (isDigit(ch)) {
-                tok.type = "NUMBER";
-                tok.literal = readNumber();
-                if(tok.literal == "") tok.type = "ILLEGAL";
-                return tok;
+            if (IsLetter(ch)) {
+                std::string ident = ReadIdentifier();
+                TokenType type = LookupIdent(ident);
+                tok = Token(type, ident);
+                return tok;  // Early return
+            } else if (IsDigit(ch)) {
+                std::string number = ReadNumber();
+                if (number.find('.') != std::string::npos) {
+                    tok = Token(TokenType::FLOAT_LITERAL, number);
+                } else {
+                    tok = Token(TokenType::INT_LITERAL, number);
+                }
+                return tok;  // Early return
             } else {
-                tok = newToken("ILLEGAL", charToString(ch));
+                tok = NewToken(TokenType::ILLEGAL, std::string(1, ch));
             }
+            break;
     }
 
-    readChar();
+    ReadChar();
     return tok;
 }
