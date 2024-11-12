@@ -35,7 +35,7 @@ int main() {
 
 // Test Program 1
 void test_program1() {
-    std::ifstream file("tests/test-files/lexer_test1.fpp");
+    std::ifstream file("tests/lexer_tests/lexer_test1.fpp");
     if (!file.is_open()) {
         std::cerr << "Error opening lexer_test1.fpp" << std::endl;
         return;
@@ -86,7 +86,7 @@ void test_program1() {
 
 // Test Program 2
 void test_program2() {
-    std::ifstream file("tests/test-files/lexer_test2.fpp");
+    std::ifstream file("tests/lexer_tests/lexer_test2.fpp");
     if (!file.is_open()) {
         std::cerr << "Error opening lexer_test2.fpp" << std::endl;
         return;
@@ -139,7 +139,7 @@ void test_program2() {
 // Test Program 3
 void test_program3() {
 
-    std::ifstream file("tests/test-files/lexer_test3.fpp");
+    std::ifstream file("tests/lexer_tests/lexer_test3.fpp");
     if (!file.is_open()) {
         std::cerr << "Error opening lexer_test3.fpp" << std::endl;
         return;
@@ -196,7 +196,7 @@ void test_program3() {
 
 // Test Program 4
 void test_program4() {
-    std::ifstream file("tests/test-files/lexer_test4.fpp");
+    std::ifstream file("tests/lexer_tests/lexer_test4.fpp");
     if (!file.is_open()) {
         std::cerr << "Error opening lexer_test4.fpp" << std::endl;
         return;
@@ -245,7 +245,7 @@ void test_program4() {
 
 // Test Program 5
 void test_program5() {
-    std::ifstream file("tests/test-files/lexer_test5.fpp");
+    std::ifstream file("tests/lexer_tests/lexer_test5.fpp");
     if (!file.is_open()) {
         std::cerr << "Error opening lexer_test5.fpp" << std::endl;
         return;
