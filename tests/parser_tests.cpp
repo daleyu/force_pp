@@ -66,7 +66,7 @@ int basicDeclarationTest() {
     for (const auto& stmt : program->statements) {
         std::cout << stmt->tokenLiteral() << std::endl;
     }
-    std::cout << program->statements[0]->tokenLiteral() << std::endl;
+    std::cout << program->tokenLiteral() << std::endl;
 
 
     // Assuming the program has at least one statement

@@ -22,14 +22,14 @@ private:
     Token peekToken;
     std::vector<std::string> errors;
 
-    // Token-related methods
+    // Token methods for interacting with lexer and tokens
     void peekError(TokenType t);
     void nextToken();
     bool curTokenIs(TokenType t) const;
     bool peekTokenIs(TokenType t) const;
     bool expectPeek(TokenType t);
 
-    // Helper methods
+    // Helper methods needed for parsing prefix and infix expressions
     bool isType(TokenType t) const;
     int peekPrecedence() const;
     int curPrecedence() const;
@@ -42,6 +42,7 @@ private:
     std::unique_ptr<Statement> parseAssignmentStatement();
     std::unique_ptr<Statement> parseExpressionStatement();
     std::unique_ptr<Statement> parseForLoop();
+    std::unique_ptr<Statement> parseForNLoop();
     std::unique_ptr<Statement> parseWhileLoop();
     std::unique_ptr<Statement> parseIfStatement();
     std::unique_ptr<Statement> parseReturnStatement();

@@ -176,6 +176,24 @@ public:
     }
 };
 
+class ForNLoop : public Statement {
+public:
+    std::string iterator;        // loop variable
+    std::unique_ptr<Expression> end;  // End value
+    std::unique_ptr<Block> body;      // Loop body
+
+    ForNLoop() = default;
+    
+    ForNLoop(std::string iter, std::unique_ptr<Expression> endVal, std::unique_ptr<Block> loopBody)
+        : iterator(std::move(iter)),
+          end(std::move(endVal)),
+          body(std::move(loopBody)) {}
+
+    std::string tokenLiteral() const override {
+        return "forn";
+    }
+};
+
 // Identifier
 class Identifier : public Expression {
 public:

@@ -2,6 +2,7 @@
 
 #include "parser.h"
 #include <unordered_map>
+#include <iostream>
 
 // Constructor
 Parser::Parser(std::shared_ptr<Lexer> l)
@@ -74,7 +75,7 @@ bool Parser::expectPeek(TokenType t) {
 }
 
 void Parser::peekError(TokenType t) {
-    std::string msg = "expected next token to be " + TokenTypeToString(t) + ", got " + TokenTypeToString(peekToken.type) + " instead";
+    std::string msg = "Unexpected Token Error: Expected" + TokenTypeToString(t) + ", got " + TokenTypeToString(peekToken.type) + " instead";
     errors.push_back(msg);
 }
 
@@ -120,6 +121,8 @@ std::unique_ptr<Statement> Parser::parseStatement() {
         return parseReturnStatement();
     } else if (curTokenIs(TokenType::FOR)) {
         return parseForLoop();
+    } else if (curTokenIs(TokenType::FORN)) {
+        return parseForNLoop();
     } else if (curTokenIs(TokenType::WHILE)) {
         return parseWhileLoop();
     } else if (curTokenIs(TokenType::IF)) {
@@ -286,6 +289,52 @@ std::unique_ptr<Statement> Parser::parseWhileLoop() {
 
     return stmt;
 }
+std::unique_ptr<Statement> Parser::parseForNLoop() {
+    auto stmt = std::make_unique<ForNLoop>();
+
+    // Expect and consume '('
+    if (!expectPeek(TokenType::LPAREN)) {
+        return nullptr;
+    }
+
+    // Parse iterator name
+    nextToken();
+    if (!curTokenIs(TokenType::IDENT)) {
+        return nullptr;
+    }
+    stmt->iterator = curToken.literal;
+
+    // Expect and consume ','
+    if (!expectPeek(TokenType::COMMA)) {
+        return nullptr;
+    }
+
+    // Parse end expression
+    nextToken();
+    stmt->end = parseExpression();
+    if (!stmt->end) {
+        return nullptr;
+    }
+
+    // Expect and consume ')'
+    if (!expectPeek(TokenType::RPAREN)) {
+        return nullptr;
+    }
+
+    // Expect and consume '{'
+    if (!expectPeek(TokenType::LBRACE)) {
+        return nullptr;
+    }
+
+    // Parse loop body
+    stmt->body = std::unique_ptr<Block>(dynamic_cast<Block*>(parseBlock().release()));
+    if (!stmt->body) {
+        return nullptr;
+    }
+
+    return stmt;
+}
+
 
 std::unique_ptr<Statement> Parser::parseForLoop() {
     // Simplified for loop parsing
@@ -364,7 +413,9 @@ std::unique_ptr<Expression> Parser::parseExpression(int precedence) {
             leftExp = parseGroupedExpression();
             break;
         default:
-            // Handle error
+            // error in expression
+            std::string err_msg = "Error in Expression:" + curToken.literal;
+            errors.push_back(err_msg);
             return nullptr;
     }
 
@@ -431,6 +482,10 @@ std::unique_ptr<Expression> Parser::parseGroupedExpression() {
     return exp;
 }
 
+// Parse a prefix expression, such as "!x" or "-x".
+// Prefix expressions have the highest precedence of all expressions.
+// The precedence of a prefix expression is determined by the operator.
+// For example, the precedence of "!x" is the same as the precedence of "!".
 std::unique_ptr<Expression> Parser::parsePrefixExpression() {
     auto expr = std::make_unique<UnaryExpression>();
 
@@ -476,7 +531,16 @@ std::vector<std::unique_ptr<Expression>> Parser::parseExpressionList(TokenType e
     return args;
 }
 
-// Infix parsing functions
+// Parse an infix expression, such as "x + y" or "x && y".
+// Infix expressions have a left operand, an operator, and a right operand.
+// The precedence of an infix expression is determined by the operator.
+// For example, the precedence of "x + y" is the same as the precedence of "+".
+// The precedence of an infix expression is used to determine the order in which
+// the expression is evaluated.
+// For example, in the expression "x + y * z", the '*' operator has higher
+// precedence than the '+' operator, so the expression is evaluated as
+// "(x + (y * z))", not as "(x * y) + z".
+// The precedence of an infix expression is stored in the curPrecedence() function.
 std::unique_ptr<Expression> Parser::parseInfixExpression(std::unique_ptr<Expression> left) {
     auto expr = std::make_unique<BinaryExpression>();
 
