@@ -34,3 +34,5 @@
 .DS_Store
 .vscode
 run_tests
+lexer_test
+parser_test
