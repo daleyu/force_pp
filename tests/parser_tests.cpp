@@ -51,11 +51,19 @@ void testSimpleDeclaration() {
     Parser parser(lexer);
 
     auto program = parser.ParseProgram();
-    auto expectedAST = std::make_shared<ASTNode>(NODE_TYPE_VARIABLE, "Declaration");
-    expectedAST->children.push_back(std::make_shared<ASTNode>("Declaration", "int", "x", "7"));
 
-    compareAST(expectedAST, program->statements[0]);
+    // Construct expected AST manually
+    auto expectedProgram = std::make_unique<Program>();
+    auto varDecl = std::make_unique<VariableDeclaration>();
+    varDecl->type = "int";
+    varDecl->name = "x";
+    varDecl->initializer = std::make_unique<Literal>(Literal::Type::Integer, "7");
+    expectedProgram->statements.push_back(std::move(varDecl));
+
+    // Compare the actual AST with the expected AST
+    assert(compareAST(expectedProgram.get(), program.get()));
 }
+
 
 // Test function for parsing multiple declarations and assignments
 void testMultipleDeclarationsAndAssignments() {
@@ -69,6 +77,7 @@ void testMultipleDeclarationsAndAssignments() {
     expectedAST->children.push_back(std::make_shared<ASTNode>("Assignment", "result", "+", "x", "y"));
 
     compareAST(expectedAST, program->statements[0]);
+    std::cout << "testMultipleDeclarationsAndAssignments passed" << std::endl;
 }
 
 // Test function for parsing an if statement
@@ -87,6 +96,7 @@ void testIfStatement() {
     expectedAST->children.push_back(ifStmt);
 
     compareAST(expectedAST, program->statements[0]);
+    std::cout << "testIfStatement passed" << std::endl;
 }
 
 void test_program1() {
@@ -105,6 +115,7 @@ void test_program1() {
 
     // You can add assertions or comparisons here
     assert(program != nullptr);
+    std::cout << "test_program1 passed" << std::endl;
 }
 
 void test_program2() {
@@ -122,6 +133,7 @@ void test_program2() {
     std::unique_ptr<Program> program = parser.parseProgram();
 
     assert(program != nullptr);
+    std::cout << "test_program2 passed" << std::endl;
 }
 
 void test_program3() {
@@ -139,8 +151,8 @@ void test_program3() {
     std::unique_ptr<Program> program = parser.parseProgram();
 
     assert(program != nullptr);
+    std::cout << "test_program3 passed" << std::endl;
 }
-
 void test_program4() {
     std::ifstream file("tests/parser_tests/parser_test4.fpp");
     if (!file.is_open()) {
@@ -156,6 +168,7 @@ void test_program4() {
     std::unique_ptr<Program> program = parser.parseProgram();
 
     assert(program != nullptr);
+    std::cout << "test_program4 passed" << std::endl;
 }
 
 void test_program5() {
@@ -178,6 +191,7 @@ void test_program5() {
 
 // Main function to run all tests
 int main() {
+    std::cout << "Running Parser Tests" << std::endl;
     testSimpleDeclaration();
     testMultipleDeclarationsAndAssignments();
     testIfStatement();
