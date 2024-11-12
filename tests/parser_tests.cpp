@@ -46,38 +46,38 @@ void test_program5();
 // }
 
 
-int basicDeclarationTest() {
-    std::string input = "int x = 42;";
-    std::cout << "Basic Declaration test" << std::endl;
+// int basicDeclarationTest() {
+//     std::string input = "int x = 42;";
+//     std::cout << "Basic Declaration test" << std::endl;
 
-    auto lexer = std::make_shared<Lexer>(input);
-    Parser parser(lexer);
+//     auto lexer = std::make_shared<Lexer>(input);
+//     Parser parser(lexer);
 
-    auto program = parser.ParseProgram();
+//     auto program = parser.ParseProgram();
 
-    if (!parser.Errors().empty()) {
-        for (const auto& error : parser.Errors()) {
-            std::cerr << "Parser error: " << error << std::endl;
-        }
-        return 1;
-    }
+//     if (!parser.Errors().empty()) {
+//         for (const auto& error : parser.Errors()) {
+//             std::cerr << "Parser error: " << error << std::endl;
+//         }
+//         return 1;
+//     }
 
-    //check and print out everything in program
-    for (const auto& stmt : program->statements) {
-        std::cout << stmt->tokenLiteral() << std::endl;
-    }
-    std::cout << program->statements[0]->tokenLiteral() << std::endl;
+//     //check and print out everything in program
+//     for (const auto& stmt : program->statements) {
+//         std::cout << stmt->tokenLiteral() << std::endl;
+//     }
+//     std::cout << program->statements[0]->tokenLiteral() << std::endl;
 
 
-    // Assuming the program has at least one statement
-    if (!program->statements.empty()) {
-        auto& stmt = program->statements[0];
-        std::cout << stmt->tokenLiteral() << std::endl;
-    }
+//     // Assuming the program has at least one statement
+//     if (!program->statements.empty()) {
+//         auto& stmt = program->statements[0];
+//         std::cout << stmt->tokenLiteral() << std::endl;
+//     }
 
-    std::cout << "Basic Declaration test passed" << std::endl;
-    return 0;
-}
+//     std::cout << "Basic Declaration test passed" << std::endl;
+//     return 0;
+// }
 
 // // Test function for parsing a simple declaration
 // void testSimpleDeclaration() {
@@ -226,7 +226,7 @@ int basicDeclarationTest() {
 // Main function to run all tests
 int main() {
     std::cout << "Running Parser Tests" << std::endl;
-    basicDeclarationTest();
+    // basicDeclarationTest();
     // testSimpleDeclaration();
     // testMultipleDeclarationsAndAssignments();
     // testIfStatement();

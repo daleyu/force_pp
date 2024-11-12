@@ -1,1 +1,5 @@
-int x = 8;
+int solve() {
+	int a;
+	int b;
+	int c;
+}

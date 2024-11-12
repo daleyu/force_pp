@@ -6,6 +6,7 @@
 
 #include "token/token.h"
 #include "lexer/lexer.h"
+#include "parser/parser.h"
 
 int main(int argc, char* argv[]) {
 
@@ -29,13 +30,20 @@ int main(int argc, char* argv[]) {
 
     // Get tokens
     std::vector<Token> tokens;
-    Token tok = lexer.nextToken();
-    while (tok.type != "EOF") {
+    Token tok = lexer.NextToken();
+    while (tok.type != TokenType::EOF_TOKEN) {
         tokens.push_back(tok);
-        std::cout << tok.type << ' ' << tok.literal << std::endl;
-        tok = lexer.nextToken();
+        std::cout << TokenTypeToString(tok.type) << '\n';
+        tok = lexer.NextToken();
     }
     tokens.push_back(tok); // Add the EOF token
+
+    Parser parser(tokens);
+    parser.parseProgram();
+
+    parser.printNodes();
+
+
 
     return 0;
 }

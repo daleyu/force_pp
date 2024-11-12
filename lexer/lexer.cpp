@@ -39,7 +39,7 @@ Lexer::Lexer(const std::string& input)
 }
 
 void Lexer::ReadChar() {
-    if (readPosition >= input.size()) {
+    if (readPosition >= (int)input.size()) {
         ch = 0;
     } else {
         ch = input[readPosition];
@@ -49,7 +49,7 @@ void Lexer::ReadChar() {
 }
 
 char Lexer::PeekChar() {
-    if (readPosition >= input.size()) {
+    if (readPosition >= (int)input.size()) {
         return 0;
     } else {
         return input[readPosition];

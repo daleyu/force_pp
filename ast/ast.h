@@ -7,246 +7,248 @@
 #include <vector>
 #include <memory>
 
+
 // AST structure
 class ASTNode {
 public:
-    virtual ~ASTNode() = default;
-    virtual std::string tokenLiteral() const = 0;
-};
-
-// Base class for all statements
-class Statement : public ASTNode {
-public:
-    virtual ~Statement() = default;
-};
-
-// Base class for all expressions
-class Expression : public ASTNode {
-public:
-    virtual ~Expression() = default;
-};
-
-// Forward declarations
-class Parameter;
-class Block;
-class Identifier;
-class Literal;
-class UnaryExpression;
-class BinaryExpression;
-class FunctionCall;
-
-// Parameter ::= Type Identifier
-class Parameter : public ASTNode {
-public:
     std::string type;
     std::string name;
-
-    std::string tokenLiteral() const override {
-        return type + " " + name;
-    }
+    std::vector<int> children;
 };
 
-// Block ::= "{" StatementList "}"
-class Block : public Statement {
-public:
-    std::vector<std::unique_ptr<Statement> > statements;
+// // Base class for all statements
+// class Statement : public ASTNode {
+// public:
+//     virtual ~Statement() = default;
+// };
 
-    std::string tokenLiteral() const override {
-        return "{...}";
-    }
-};
+// // Base class for all expressions
+// class Expression : public ASTNode {
+// public:
+//     virtual ~Expression() = default;
+// };
 
-// this is the main block that we care about for our ast parsing. 
-// Program ::= FunctionDefinition*
-class Program : public ASTNode {
-public:
-    std::vector<std::unique_ptr<Statement> > statements;
+// // Forward declarations
+// class Parameter;
+// class Block;
+// class Identifier;
+// class Literal;
+// class UnaryExpression;
+// class BinaryExpression;
+// class FunctionCall;
 
-    std::string tokenLiteral() const override {
-        if (!statements.empty()) {
-            return statements.front()->tokenLiteral();
-        }
-        return "";
-    }
-};
+// // Parameter ::= Type Identifier
+// class Parameter : public ASTNode {
+// public:
+//     std::string type;
+//     std::string name;
 
-// FunctionDefinition ::= Type Identifier "(" ParameterList? ")" Block
-class FunctionDefinition : public Statement {
-public:
-    std::string returnType;
-    std::string name;
-    std::vector<std::unique_ptr<Parameter> > parameters;
-    std::unique_ptr<Block> body;
+//     std::string tokenLiteral() const override {
+//         return type + " " + name;
+//     }
+// };
 
-    std::string tokenLiteral() const override {
-        return returnType + " " + name;
-    }
-};
+// // Block ::= "{" StatementList "}"
+// class Block : public Statement {
+// public:
+//     std::vector<std::unique_ptr<Statement> > statements;
 
-// VariableDeclaration ::= Type Identifier ( "=" Expression )?
-class VariableDeclaration : public Statement {
-public:
-    std::string type;
-    std::string name;
-    std::unique_ptr<Expression> initializer;
+//     std::string tokenLiteral() const override {
+//         return "{...}";
+//     }
+// };
 
-    VariableDeclaration() = default;
+// // this is the main block that we care about for our ast parsing. 
+// // Program ::= FunctionDefinition*
+// class Program : public ASTNode {
+// public:
+//     std::vector<std::unique_ptr<Statement> > statements;
 
-    std::string tokenLiteral() const override {
-        return type + " " + name;
-    }
-};
+//     std::string tokenLiteral() const override {
+//         if (!statements.empty()) {
+//             return statements.front()->tokenLiteral();
+//         }
+//         return "";
+//     }
+// };
 
-// AssignmentStatement ::= Identifier "=" Expression
-class AssignmentStatement : public Statement {
-public:
-    std::string name;
-    std::unique_ptr<Expression> value;
+// // FunctionDefinition ::= Type Identifier "(" ParameterList? ")" Block
+// class FunctionDefinition : public Statement {
+// public:
+//     std::string returnType;
+//     std::string name;
+//     std::vector<std::unique_ptr<Parameter> > parameters;
+//     std::unique_ptr<Block> body;
 
-    AssignmentStatement() = default;
+//     std::string tokenLiteral() const override {
+//         return returnType + " " + name;
+//     }
+// };
 
-    std::string tokenLiteral() const override {
-        return name + " = ...";
-    }
-};
+// // VariableDeclaration ::= Type Identifier ( "=" Expression )?
+// class VariableDeclaration : public Statement {
+// public:
+//     std::string type;
+//     std::string name;
+//     std::unique_ptr<Expression> initializer;
 
-// ExpressionStatement ::= Expression
-class ExpressionStatement : public Statement {
-public:
-    std::unique_ptr<Expression> expression;
+//     VariableDeclaration() = default;
 
-    ExpressionStatement() = default;
+//     std::string tokenLiteral() const override {
+//         return type + " " + name;
+//     }
+// };
 
-    std::string tokenLiteral() const override {
-        return expression ? expression->tokenLiteral() : "";
-    }
-};
+// // AssignmentStatement ::= Identifier "=" Expression
+// class AssignmentStatement : public Statement {
+// public:
+//     std::string name;
+//     std::unique_ptr<Expression> value;
 
-// ReturnStatement ::= "return" [ Expression ]
-class ReturnStatement : public Statement {
-public:
-    std::unique_ptr<Expression> returnValue;
+//     AssignmentStatement() = default;
 
-    ReturnStatement() = default;
+//     std::string tokenLiteral() const override {
+//         return name + " = ...";
+//     }
+// };
 
-    std::string tokenLiteral() const override {
-        return "return";
-    }
-};
+// // ExpressionStatement ::= Expression
+// class ExpressionStatement : public Statement {
+// public:
+//     std::unique_ptr<Expression> expression;
 
-// IfStatement ::= "if" "(" Condition ")" Block [ "else" Block ]
-class IfStatement : public Statement {
-public:
-    std::unique_ptr<Expression> condition;
-    std::unique_ptr<Block> consequence;
-    std::unique_ptr<Block> alternative;
+//     ExpressionStatement() = default;
 
-    IfStatement() = default;
+//     std::string tokenLiteral() const override {
+//         return expression ? expression->tokenLiteral() : "";
+//     }
+// };
 
-    std::string tokenLiteral() const override {
-        return "if (...)";
-    }
-};
+// // ReturnStatement ::= "return" [ Expression ]
+// class ReturnStatement : public Statement {
+// public:
+//     std::unique_ptr<Expression> returnValue;
 
-// WhileLoop ::= "while" "(" Condition ")" Block
-class WhileLoop : public Statement {
-public:
-    std::unique_ptr<Expression> condition;
-    std::unique_ptr<Block> body;
+//     ReturnStatement() = default;
 
-    WhileLoop() = default;
+//     std::string tokenLiteral() const override {
+//         return "return";
+//     }
+// };
 
-    std::string tokenLiteral() const override {
-        return "while (...)";
-    }
-};
+// // IfStatement ::= "if" "(" Condition ")" Block [ "else" Block ]
+// class IfStatement : public Statement {
+// public:
+//     std::unique_ptr<Expression> condition;
+//     std::unique_ptr<Block> consequence;
+//     std::unique_ptr<Block> alternative;
 
-// ForLoop
-class ForLoop : public Statement {
-public:
-    std::unique_ptr<Statement> initializer;
-    std::unique_ptr<Expression> condition;
-    std::unique_ptr<Statement> update;
-    std::unique_ptr<Block> body;
+//     IfStatement() = default;
 
-    ForLoop() = default;
+//     std::string tokenLiteral() const override {
+//         return "if (...)";
+//     }
+// };
 
-    std::string tokenLiteral() const override {
-        return "for (...)";
-    }
-};
+// // WhileLoop ::= "while" "(" Condition ")" Block
+// class WhileLoop : public Statement {
+// public:
+//     std::unique_ptr<Expression> condition;
+//     std::unique_ptr<Block> body;
 
-// Identifier
-class Identifier : public Expression {
-public:
-    std::string value;
+//     WhileLoop() = default;
 
-    explicit Identifier(std::string value) : value(std::move(value)) {}
+//     std::string tokenLiteral() const override {
+//         return "while (...)";
+//     }
+// };
 
-    std::string tokenLiteral() const override {
-        return value;
-    }
-};
+// // ForLoop
+// class ForLoop : public Statement {
+// public:
+//     std::unique_ptr<Statement> initializer;
+//     std::unique_ptr<Expression> condition;
+//     std::unique_ptr<Statement> update;
+//     std::unique_ptr<Block> body;
 
-// Literal ::= <DECIMAL_LITERAL> | <FLOAT_LITERAL> | <STRING_LITERAL> | <CHAR_LITERAL> | <BOOLEAN_LITERAL>
-class Literal : public Expression {
-public:
-    enum class Type {
-        Integer,
-        Float,
-        String,
-        Char,
-        Boolean
-    } type;
+//     ForLoop() = default;
 
-    std::string value;
+//     std::string tokenLiteral() const override {
+//         return "for (...)";
+//     }
+// };
 
-    Literal(Type type, std::string value)
-        : type(type), value(std::move(value)) {}
+// // Identifier
+// class Identifier : public Expression {
+// public:
+//     std::string value;
 
-    std::string tokenLiteral() const override {
-        return value;
-    }
-};
+//     explicit Identifier(std::string value) : value(std::move(value)) {}
 
-// UnaryExpression ::= UnaryOperator Expression
-class UnaryExpression : public Expression {
-public:
-    std::string op;
-    std::unique_ptr<Expression> operand;
+//     std::string tokenLiteral() const override {
+//         return value;
+//     }
+// };
 
-    UnaryExpression() = default;
+// // Literal ::= <DECIMAL_LITERAL> | <FLOAT_LITERAL> | <STRING_LITERAL> | <CHAR_LITERAL> | <BOOLEAN_LITERAL>
+// class Literal : public Expression {
+// public:
+//     enum class Type {
+//         Integer,
+//         Float,
+//         String,
+//         Char,
+//         Boolean
+//     } type;
 
-    std::string tokenLiteral() const override {
-        return "(" + op + operand->tokenLiteral() + ")";
-    }
-};
+//     std::string value;
 
-// BinaryExpression ::= Expression BinaryOperator Expression
-class BinaryExpression : public Expression {
-public:
-    std::unique_ptr<Expression> left;
-    std::string op;
-    std::unique_ptr<Expression> right;
+//     Literal(Type type, std::string value)
+//         : type(type), value(std::move(value)) {}
 
-    BinaryExpression() = default;
+//     std::string tokenLiteral() const override {
+//         return value;
+//     }
+// };
 
-    std::string tokenLiteral() const override {
-        return "(" + left->tokenLiteral() + " " + op + " " + right->tokenLiteral() + ")";
-    }
-};
+// // UnaryExpression ::= UnaryOperator Expression
+// class UnaryExpression : public Expression {
+// public:
+//     std::string op;
+//     std::unique_ptr<Expression> operand;
 
-// FunctionCall ::= Identifier "(" ArgumentList? ")"
-class FunctionCall : public Expression {
-public:
-    std::string functionName;
-    std::vector<std::unique_ptr<Expression> > arguments;
+//     UnaryExpression() = default;
 
-    FunctionCall() = default;
+//     std::string tokenLiteral() const override {
+//         return "(" + op + operand->tokenLiteral() + ")";
+//     }
+// };
 
-    std::string tokenLiteral() const override {
-        return functionName + "(...)";
-    }
-};
+// // BinaryExpression ::= Expression BinaryOperator Expression
+// class BinaryExpression : public Expression {
+// public:
+//     std::unique_ptr<Expression> left;
+//     std::string op;
+//     std::unique_ptr<Expression> right;
+
+//     BinaryExpression() = default;
+
+//     std::string tokenLiteral() const override {
+//         return "(" + left->tokenLiteral() + " " + op + " " + right->tokenLiteral() + ")";
+//     }
+// };
+
+// // FunctionCall ::= Identifier "(" ArgumentList? ")"
+// class FunctionCall : public Expression {
+// public:
+//     std::string functionName;
+//     std::vector<std::unique_ptr<Expression> > arguments;
+
+//     FunctionCall() = default;
+
+//     std::string tokenLiteral() const override {
+//         return functionName + "(...)";
+//     }
+// };
 
 #endif // AST_H
