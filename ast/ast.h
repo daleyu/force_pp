@@ -7,7 +7,7 @@
 #include <vector>
 #include <memory>
 
-// Base class for all AST nodes
+// AST structure
 class ASTNode {
 public:
     virtual ~ASTNode() = default;
@@ -49,17 +49,18 @@ public:
 // Block ::= "{" StatementList "}"
 class Block : public Statement {
 public:
-    std::vector<std::unique_ptr<Statement>> statements;
+    std::vector<std::unique_ptr<Statement> > statements;
 
     std::string tokenLiteral() const override {
         return "{...}";
     }
 };
 
+// this is the main block that we care about for our ast parsing. 
 // Program ::= FunctionDefinition*
 class Program : public ASTNode {
 public:
-    std::vector<std::unique_ptr<Statement>> statements;
+    std::vector<std::unique_ptr<Statement> > statements;
 
     std::string tokenLiteral() const override {
         if (!statements.empty()) {
@@ -74,7 +75,7 @@ class FunctionDefinition : public Statement {
 public:
     std::string returnType;
     std::string name;
-    std::vector<std::unique_ptr<Parameter>> parameters;
+    std::vector<std::unique_ptr<Parameter> > parameters;
     std::unique_ptr<Block> body;
 
     std::string tokenLiteral() const override {
@@ -239,7 +240,7 @@ public:
 class FunctionCall : public Expression {
 public:
     std::string functionName;
-    std::vector<std::unique_ptr<Expression>> arguments;
+    std::vector<std::unique_ptr<Expression> > arguments;
 
     FunctionCall() = default;
 
