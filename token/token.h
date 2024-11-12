@@ -10,7 +10,7 @@ enum class TokenType {
     EOF_TOKEN,
 
     // Identifiers + literals
-    IDENT,      // add, foobar, x, y, ...
+    IDENT,      // food
     INT_LITERAL,
     FLOAT_LITERAL,
     STRING_LITERAL,
@@ -61,7 +61,7 @@ enum class TokenType {
     VI,
     FOR,
     WHILE,
-
+    FORN,
     VOID,
 };
 

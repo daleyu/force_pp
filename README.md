@@ -166,3 +166,7 @@ All demos for this language can be found in the `./demos` folder.
 ##### References 
 
 Collection of popular macros in comp programming: https://gist.github.com/abinashmeher999/e5993d17e9d25227cbe3#file-comp_macros-h-L3
+
+How does Infix Parsing work: https://www.chris-j.co.uk/parsing.php
+
+Pratt Parsing example online: https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html
