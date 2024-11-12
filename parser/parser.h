@@ -47,9 +47,12 @@ private:
     std::unique_ptr<Statement> parseReturnStatement();
     std::unique_ptr<Block> parseBlock();
     std::unique_ptr<Expression> parseExpression(int precedence = 0);
+    std::vector<std::unique_ptr<Expression> > parseExpressionList(TokenType end);
+    
 
     // Prefix parsing functions
     std::unique_ptr<Expression> parseIdentifier();
+    std::unique_ptr<Expression> parseLiteral();
     std::unique_ptr<Expression> parseIntegerLiteral();
     std::unique_ptr<Expression> parseBooleanLiteral();
     std::unique_ptr<Expression> parseGroupedExpression();

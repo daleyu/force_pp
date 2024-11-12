@@ -4,8 +4,13 @@
 #include <unordered_map>
 
 // Constructor
-Parser::Parser(std::shared_ptr<Lexer> l) : lexer(l), errors() {
-    // Initialize precedences
+Parser::Parser(std::shared_ptr<Lexer> l)
+    : lexer(l), curToken(lexer->NextToken()), peekToken(lexer->NextToken()), errors() 
+{
+
+    
+    // we need to have this table to know what order to do different operators
+    // We need this for the recursive descent parsing
     precedences = {
         {TokenType::EQ, Precedence::EQUALS},
         {TokenType::NOT_EQ, Precedence::EQUALS},
@@ -17,7 +22,6 @@ Parser::Parser(std::shared_ptr<Lexer> l) : lexer(l), errors() {
         {TokenType::MINUS, Precedence::SUM},
         {TokenType::SLASH, Precedence::PRODUCT},
         {TokenType::ASTERISK, Precedence::PRODUCT},
-        {TokenType::PERCENT, Precedence::PRODUCT},
         {TokenType::AND, Precedence::AND},
         {TokenType::OR, Precedence::OR},
         {TokenType::LPAREN, Precedence::CALL}
@@ -370,7 +374,6 @@ std::unique_ptr<Expression> Parser::parseExpression(int precedence) {
             case TokenType::MINUS:
             case TokenType::SLASH:
             case TokenType::ASTERISK:
-            case TokenType::PERCENT:
             case TokenType::EQ:
             case TokenType::NOT_EQ:
             case TokenType::LT:

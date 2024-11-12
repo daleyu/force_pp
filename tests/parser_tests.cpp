@@ -48,6 +48,7 @@ void test_program5();
 
 int basicDeclarationTest() {
     std::string input = "int x = 42;";
+    std::cout << "Basic Declaration test" << std::endl;
 
     auto lexer = std::make_shared<Lexer>(input);
     Parser parser(lexer);
@@ -61,12 +62,20 @@ int basicDeclarationTest() {
         return 1;
     }
 
+    //check and print out everything in program
+    for (const auto& stmt : program->statements) {
+        std::cout << stmt->tokenLiteral() << std::endl;
+    }
+    std::cout << program->statements[0]->tokenLiteral() << std::endl;
+
+
     // Assuming the program has at least one statement
     if (!program->statements.empty()) {
         auto& stmt = program->statements[0];
         std::cout << stmt->tokenLiteral() << std::endl;
     }
 
+    std::cout << "Basic Declaration test passed" << std::endl;
     return 0;
 }
 
