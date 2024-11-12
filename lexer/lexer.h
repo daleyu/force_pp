@@ -11,19 +11,19 @@ private:
     int readPosition; // current reading position in input (after current char)
     char ch;          // current char under examination
 
-    void readChar();
-    char peekChar();
-    std::string readIdentifier();
-    std::string readNumber();
-    void skipWhitespace();
-    bool isLetter(char ch);
-    bool isDigit(char ch);
+    void ReadChar();
+    char PeekChar();
+    std::string ReadIdentifier();
+    std::string ReadNumber();
+    void SkipWhitespace();
+    bool IsLetter(char ch);
+    bool IsDigit(char ch);
 
 public:
     Lexer(const std::string& input);
-    Token nextToken();
+    Token NextToken();
 
-    static Token newToken(std::string type, const std::string& literal);
+    Token NewToken(TokenType type, const std::string& literal);
 };
 
 #endif // LEXER_H

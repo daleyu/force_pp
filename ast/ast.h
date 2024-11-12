@@ -17,15 +17,16 @@ public:
 // Program ::= FunctionDefinition*
 class Program : public ASTNode {
 public:
-    std::vector<std::unique_ptr<ASTNode>> functions;
+    std::vector<std::unique_ptr<Statement>> statements;
 
     std::string tokenLiteral() const override {
-        if (!functions.empty()) {
-            return functions.front()->tokenLiteral();
+        if (!statements.empty()) {
+            return statements.front()->tokenLiteral();
         }
         return "";
     }
 };
+
 
 // FunctionDefinition ::= Type Identifier "(" ParameterList? ")" Block
 class FunctionDefinition : public ASTNode {
@@ -76,13 +77,11 @@ public:
     std::string name;
     std::unique_ptr<Expression> initializer;
 
-    VariableDeclaration(std::string type, std::string name, std::unique_ptr<Expression> initializer = nullptr)
-        : type(std::move(type)), name(std::move(name)), initializer(std::move(initializer)) {}
-
     std::string tokenLiteral() const override {
         return type + " " + name;
     }
 };
+
 
 // AssignmentStatement ::= Identifier "=" Expression
 class AssignmentStatement : public Statement {
