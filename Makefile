@@ -1,13 +1,17 @@
 CXX = g++
 CXXFLAGS = -Wall -Werror -std=c++17
+
+# Object files
 LEXER_OBJ = lexer.o
 TOKEN_OBJ = token.o
 LEXER_TESTS_OBJ = lexer_tests.o
 PARSER_TESTS_OBJ = parser_tests.o
+PARSER_OBJ = parser.o
 AST_OBJ = ast/ast.o
 
-EXECUTABLE = main
-RUN_TESTS_EXECUTABLE = run_tests
+MAIN_EXECUTABLE = main
+LEXER_TEST_EXECUTABLE = lexer_test
+PARSER_TEST_EXECUTABLE = parser_test
 
 # Compile token.o
 $(TOKEN_OBJ): token/token.cpp token/token.h
@@ -29,26 +33,29 @@ $(LEXER_TESTS_OBJ): tests/lexer_tests.cpp lexer/lexer.h token/token.h
 $(PARSER_TESTS_OBJ): tests/parser_tests.cpp parser/parser.h
 	$(CXX) $(CXXFLAGS) -c tests/parser_tests.cpp -o $(PARSER_TESTS_OBJ)
 
-# run_tests: $(LEXER_OBJ) $(LEXER_TESTS_OBJ) $(PARSER_TESTS_OBJ)
-# 	$(CXX) $(CXXFLAGS) $(LEXER_OBJ) $(LEXER_TESTS_OBJ) $(PARSER_TESTS_OBJ) -o run_tests 
-# Rule to link the executable
-# run_tests: $(LEXER_OBJ) $(LEXER_TESTS_OBJ) $(TOKEN_OBJ)
-# 	$(CXX) $(CXXFLAGS) $(LEXER_OBJ) $(LEXER_TESTS_OBJ) $(TOKEN_OBJ) -o run_tests
-run_tests: $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ) $(LEXER_TESTS_OBJ) $(PARSER_TESTS_OBJ)
-	$(CXX) $(CXXFLAGS) $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ) $(LEXER_TESTS_OBJ) $(PARSER_TESTS_OBJ) -o $(RUN_TESTS_EXECUTABLE)
+# Build lexer test separately
+lexer_test: $(TOKEN_OBJ) $(LEXER_OBJ) $(LEXER_TESTS_OBJ)
+	$(CXX) $(CXXFLAGS) $(TOKEN_OBJ) $(LEXER_OBJ) $(LEXER_TESTS_OBJ) -o $(LEXER_TEST_EXECUTABLE)
+
+# Build parser test executable
+parser_test: $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ) $(PARSER_TESTS_OBJ)
+	$(CXX) $(CXXFLAGS) $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ) $(PARSER_TESTS_OBJ) -o $(PARSER_TEST_EXECUTABLE)
 
 # Compile main.o
 main.o: main.cpp lexer/lexer.h parser/parser.h token/token.h ast/ast.h
 	$(CXX) $(CXXFLAGS) -c main.cpp -o main.o
 
+# Build main executable
 main: main.o $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ)
 	$(CXX) $(CXXFLAGS) main.o $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ) -o $(MAIN_EXECUTABLE)
 
-# Rule for cleaning up compiled files
+tests: lexer_test parser_test
+
 clean:
-	rm -f $(EXECUTABLE) $(LEXER_OBJ) $(LEXER_TESTS_OBJ) $(PARSER_TESTS_OBJ) *.o main run_tests
+	rm -f $(MAIN_EXECUTABLE) $(LEXER_TEST_EXECUTABLE) $(PARSER_TEST_EXECUTABLE) \
+		$(LEXER_OBJ) $(LEXER_TESTS_OBJ) $(PARSER_TESTS_OBJ) $(TOKEN_OBJ) \
+		$(PARSER_OBJ) $(AST_OBJ) *.o
 
-# Default rule
-all: $(EXECUTABLE)
+all: main tests
 
-.PHONY: clean
+.PHONY: clean all tests lexer_test parser_test
