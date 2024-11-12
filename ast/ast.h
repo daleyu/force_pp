@@ -41,6 +41,8 @@ public:
     std::string type;
     std::string name;
 
+    Parameter() = default;
+
     std::string tokenLiteral() const override {
         return type + " " + name;
     }

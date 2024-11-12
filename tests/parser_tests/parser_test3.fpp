@@ -1,4 +1,6 @@
-int x = 7;
-if (x == 7) {
-    x = x - 1;
+void solve() {
+    int sum = 0
+    forn(i, n) {
+        sum += 1;
+    }
 }

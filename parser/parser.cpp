@@ -6,7 +6,7 @@
 
 // Constructor
 Parser::Parser(std::shared_ptr<Lexer> l)
-    : lexer(l), curToken(lexer->NextToken()), peekToken(lexer->NextToken()), errors() 
+    : lexer(l), curToken(TokenType::ILLEGAL, ""), peekToken(TokenType::ILLEGAL, ""), errors() 
 {
 
     
@@ -27,9 +27,9 @@ Parser::Parser(std::shared_ptr<Lexer> l)
         {TokenType::OR, Precedence::OR},
         {TokenType::LPAREN, Precedence::CALL}
     };
+    peekToken = lexer->NextToken(); 
+    nextToken();
 
-    nextToken();
-    nextToken();
 }
 
 // Errors function
@@ -54,6 +54,8 @@ std::unique_ptr<Program> Parser::ParseProgram() {
 void Parser::nextToken() {
     curToken = peekToken;
     peekToken = lexer->NextToken();
+    // std::cout << "curToken: " << TokenTypeToString(curToken.type) << " (" << curToken.literal << ")\n";
+    // std::cout << "peekToken: " << TokenTypeToString(peekToken.type) << " (" << peekToken.literal << ")\n";
 }
 
 bool Parser::curTokenIs(TokenType t) const {
