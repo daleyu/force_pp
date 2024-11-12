@@ -1,3 +1,5 @@
+// parser.h
+
 #ifndef PARSER_H
 #define PARSER_H
 
@@ -20,13 +22,22 @@ private:
     Token peekToken;
     std::vector<std::string> errors;
 
+    // Token-related methods
     void peekError(TokenType t);
     void nextToken();
     bool curTokenIs(TokenType t) const;
     bool peekTokenIs(TokenType t) const;
     bool expectPeek(TokenType t);
+
+    // Helper methods
+    bool isType(TokenType t) const;
+    int peekPrecedence() const;
+    int curPrecedence() const;
+    bool isAssignmentStatement() const;
+    bool isExpressionStatement() const;
+
+    // Parsing methods
     std::unique_ptr<Statement> parseStatement();
-    // Add declarations for other parse functions
     std::unique_ptr<Statement> parseVariableDeclaration();
     std::unique_ptr<Statement> parseAssignmentStatement();
     std::unique_ptr<Statement> parseExpressionStatement();
@@ -36,7 +47,33 @@ private:
     std::unique_ptr<Statement> parseReturnStatement();
     std::unique_ptr<Block> parseBlock();
     std::unique_ptr<Expression> parseExpression(int precedence = 0);
-    // ... Add more as needed
+
+    // Prefix parsing functions
+    std::unique_ptr<Expression> parseIdentifier();
+    std::unique_ptr<Expression> parseIntegerLiteral();
+    std::unique_ptr<Expression> parseBooleanLiteral();
+    std::unique_ptr<Expression> parseGroupedExpression();
+    std::unique_ptr<Expression> parsePrefixExpression();
+    std::unique_ptr<Expression> parseFunctionCall(std::unique_ptr<Expression> function);
+
+    // Infix parsing functions
+    std::unique_ptr<Expression> parseInfixExpression(std::unique_ptr<Expression> left);
+
+    // Precedence levels
+    enum Precedence {
+        LOWEST,
+        OR,           // ||
+        AND,          // &&
+        EQUALS,       // == or !=
+        LESSGREATER,  // > or <
+        SUM,          // + or -
+        PRODUCT,      // * or /
+        PREFIX,       // -X or !X
+        CALL          // function calls
+    };
+
+    // Maps for operator precedences
+    std::unordered_map<TokenType, Precedence> precedences;
 };
 
 #endif // PARSER_H
