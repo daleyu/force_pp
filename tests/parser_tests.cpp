@@ -46,38 +46,24 @@ void test_program5();
 // }
 
 
-// int basicDeclarationTest() {
-//     std::string input = "int x = 42;";
-//     std::cout << "Basic Declaration test" << std::endl;
+void basicDeclarationTest() {
+    std::string input = "int x = 5;";
+    Lexer lexer(input);
 
-//     auto lexer = std::make_shared<Lexer>(input);
-//     Parser parser(lexer);
+    std::vector<Token> tokens;
+    Token tok = lexer.NextToken();
+    while (tok.type != TokenType::EOF_TOKEN) {
+        tokens.push_back(tok);
+        tok = lexer.NextToken();
+    }
+    tokens.push_back(tok);
 
-//     auto program = parser.ParseProgram();
+    Parser parser(tokens);
 
-//     if (!parser.Errors().empty()) {
-//         for (const auto& error : parser.Errors()) {
-//             std::cerr << "Parser error: " << error << std::endl;
-//         }
-//         return 1;
-//     }
+    parser.parseProgram();
 
-//     //check and print out everything in program
-//     for (const auto& stmt : program->statements) {
-//         std::cout << stmt->tokenLiteral() << std::endl;
-//     }
-//     std::cout << program->statements[0]->tokenLiteral() << std::endl;
-
-
-//     // Assuming the program has at least one statement
-//     if (!program->statements.empty()) {
-//         auto& stmt = program->statements[0];
-//         std::cout << stmt->tokenLiteral() << std::endl;
-//     }
-
-//     std::cout << "Basic Declaration test passed" << std::endl;
-//     return 0;
-// }
+    parser.printNodes(); // If you have this method
+}
 
 // // Test function for parsing a simple declaration
 // void testSimpleDeclaration() {
@@ -115,23 +101,28 @@ void test_program5();
 // }
 
 // // Test function for parsing an if statement
-// void testIfStatement() {
-//     auto lexer = std::make_shared<Lexer>("int x = 7; if (x == 7) { x = x - 1; }");
-//     Parser parser(lexer);
+void testIfStatement() {
+    std::string input = "if (x == 7) { x = x - 1; }";
+    Lexer lexer(input);
 
-//     auto program = parser.ParseProgram();
-//     auto expectedAST = std::make_shared<ASTNode>(NODE_TYPE_VARIABLE, "Declaration");
-//     expectedAST->children.push_back(std::make_shared<ASTNode>("Declaration", "int", "x", "7"));
+    // Collect tokens
+    std::vector<Token> tokens;
+    Token tok = lexer.NextToken();
+    while (tok.type != TokenType::EOF_TOKEN) {
+        tokens.push_back(tok);
+        tok = lexer.NextToken();
+    }
+    tokens.push_back(tok);
 
-//     auto ifStmt = std::make_shared<ASTNode>("IfStatement");
-//     ifStmt->children.push_back(std::make_shared<ASTNode>("Condition", "==", "x", "7"));
-//     ifStmt->children.push_back(std::make_shared<ASTNode>("Assignment", "x", "-", "x", "1"));
+    // Initialize Parser with tokens
+    Parser parser(tokens);
 
-//     expectedAST->children.push_back(ifStmt);
+    // Parse the program
+    parser.parseProgram();
 
-//     compareAST(expectedAST, program->statements[0]);
-//     std::cout << "testIfStatement passed" << std::endl;
-// }
+    // Perform assertions
+    // For example, check that the parsed AST matches expected structure
+}
 
 // void test_program1() {
 //     std::ifstream file("tests/parser_tests/parser_test1.fpp");
@@ -226,7 +217,7 @@ void test_program5();
 // Main function to run all tests
 int main() {
     std::cout << "Running Parser Tests" << std::endl;
-    // basicDeclarationTest();
+    basicDeclarationTest();
     // testSimpleDeclaration();
     // testMultipleDeclarationsAndAssignments();
     // testIfStatement();

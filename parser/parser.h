@@ -13,7 +13,10 @@
 class Parser {
 public:
     Parser(std::vector<Token>);
-    std::vector<std::string> Errors() const;
+    std::vector<std::string> errors;
+    std::vector<std::string> Errors() const{
+        return errors;
+    }
     int createNode();
     int idx;
     std::vector<Token> tokens;
@@ -36,32 +39,32 @@ public:
 //     Token peekToken;
 //     std::vector<std::string> errors;
 
-//     // Token-related methods
-//     void peekError(TokenType t);
+    // Token-related methods
     void nextToken();
     bool curTokenIs(TokenType t);
-//     bool peekTokenIs(TokenType t) const;
-//     bool expectPeek(TokenType t);
+    bool peekTokenIs(TokenType t);
+    bool expectPeek(TokenType t);
+    void peekError(TokenType t);
 
-//     // Helper methods
+    // Helper methods
     bool isType(TokenType t) const;
-//     int peekPrecedence() const;
-//     int curPrecedence() const;
-    bool isAssignmentStatement();
     bool isExpressionStatement();
-
+    bool isAssignmentStatement();
+    int getPrecedence(TokenType type);
+    bool isBinaryOperator(TokenType type);
+    bool isBooleanOperator(TokenType type);
 //     // Parsing methods
-        int parseStatement();
-        int parseVariableDeclaration();
+    int parseStatement();
+    int parseVariableDeclaration();
     int parseAssignmentStatement();
     int parseExpressionStatement();
     int parseForLoop();
     int parseWhileLoop();
     int parseIfStatement();
     int parseReturnStatement();
-        int parseBlock();
-    int parseExpression(int precedence = 0);
+    int parseBlock();
 //     std::vector<std::unique_ptr<Expression> > parseExpressionList(TokenType end);
+    int parseExpression(int precedence = 0);
     
 
 //     // Prefix parsing functions
@@ -76,21 +79,21 @@ public:
 //     // Infix parsing functions
 //     std::unique_ptr<Expression> parseInfixExpression(std::unique_ptr<Expression> left);
 
-//     // Precedence levels
-//     enum Precedence {
-//         LOWEST,
-//         OR,           // ||
-//         AND,          // &&
-//         EQUALS,       // == or !=
-//         LESSGREATER,  // > or <
-//         SUM,          // + or -
-//         PRODUCT,      // * or /
-//         PREFIX,       // -X or !X
-//         CALL          // function calls
-//     };
+    // Precedence levels
+    enum Precedence {
+        LOWEST,
+        OR,           // ||
+        AND,          // &&
+        EQUALS,       // == or !=
+        LESSGREATER,  // > or <
+        SUM,          // + or -
+        PRODUCT,      // * or /
+        PREFIX,       // -X or !X
+        CALL          // function calls
+    };
 
-//     // Maps for operator precedences
-//     std::unordered_map<TokenType, Precedence> precedences;
+    // Maps for operator precedences
+    std::unordered_map<TokenType, Precedence> precedences;
 };
 
 #endif // PARSER_H

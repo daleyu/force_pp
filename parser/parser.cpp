@@ -12,24 +12,6 @@ Parser::Parser(std::vector<Token> t)
 
     idx = 0;
     tokens = t;
-    
-    // we need to have this table to know what order to do different operators
-    // We need this for the recursive descent parsing
-    // precedences = {
-    //     {TokenType::EQ, Precedence::EQUALS},
-    //     {TokenType::NOT_EQ, Precedence::EQUALS},
-    //     {TokenType::LT, Precedence::LESSGREATER},
-    //     {TokenType::GT, Precedence::LESSGREATER},
-    //     {TokenType::LTE, Precedence::LESSGREATER},
-    //     {TokenType::GTE, Precedence::LESSGREATER},
-    //     {TokenType::PLUS, Precedence::SUM},
-    //     {TokenType::MINUS, Precedence::SUM},
-    //     {TokenType::SLASH, Precedence::PRODUCT},
-    //     {TokenType::ASTERISK, Precedence::PRODUCT},
-    //     {TokenType::AND, Precedence::AND},
-    //     {TokenType::OR, Precedence::OR},
-    //     {TokenType::LPAREN, Precedence::CALL}
-    // };
 }
 
 void Parser::dfs(int cur, int depth) {
@@ -60,10 +42,7 @@ int Parser::createNode() {
     return nodes.size()-1;
 }
 
-// // Errors function
-// std::vector<std::string> Parser::Errors() const {
-//     return errors;
-// }
+// Errors function moved to parser.h now 
 
 // ParseProgram function
 void Parser::parseProgram() {
@@ -72,13 +51,16 @@ void Parser::parseProgram() {
     nodes[nodeIdx].type = "PROGRAM";
 
     while (!curTokenIs(TokenType::EOF_TOKEN)) {
-        int stmt = parseFunction();
+        int stmt = parseStatement();
         if (stmt != -1) {
             nodes[nodeIdx].children.push_back(stmt);
         }
-        else return;
+        else {
+            nextToken();
+        }
     }
 }
+
 
 int Parser::parseFunction() {
     bool valid = true;
@@ -176,24 +158,24 @@ bool Parser::isTokenType() {
     return false;
 }
 
-// bool Parser::peekTokenIs(TokenType t) const {
-//     return peekToken.type == t;
-// }
-
-// bool Parser::expectPeek(TokenType t) {
-//     if (peekTokenIs(t)) {
-//         nextToken();
-//         return true;
-//     } else {
-//         peekError(t);
-//         return false;
-//     }
-// }
-
-// void Parser::peekError(TokenType t) {
-//     std::string msg = "expected next token to be " + TokenTypeToString(t) + ", got " + TokenTypeToString(peekToken.type) + " instead";
-//     errors.push_back(msg);
-// }
+bool Parser::peekTokenIs(TokenType t){
+    if (idx + 1 >= (int)tokens.size()) return false;
+    return tokens[idx + 1].type == t;
+}
+bool Parser::expectPeek(TokenType t) {
+    if (peekTokenIs(t)) {
+        nextToken();
+        return true;
+    } else {
+        peekError(t);
+        return false;
+    }
+}
+void Parser::peekError(TokenType t) {
+    std::string msg = "Unexpected Token Error: Expected " + TokenTypeToString(t) 
+                      + ", got " + TokenTypeToString(tokens[idx + 1].type) + " instead";
+    errors.push_back(msg);
+}
 
 // Helper methods
 bool Parser::isType(TokenType t) const {
@@ -201,25 +183,10 @@ bool Parser::isType(TokenType t) const {
            t == TokenType::BOOL || t == TokenType::VARCHAR || t == TokenType::VI || t == TokenType::VOID;
 }
 
-// int Parser::peekPrecedence() const {
-//     auto it = precedences.find(peekToken.type);
-//     if (it != precedences.end()) {
-//         return it->second;
-//     }
-//     return Precedence::LOWEST;
-// }
-
-// int Parser::curPrecedence() const {
-//     auto it = precedences.find(curToken.type);
-//     if (it != precedences.end()) {
-//         return it->second;
-//     }
-//     return Precedence::LOWEST;
-// }
-
 bool Parser::isAssignmentStatement()  {
     return curTokenIs(TokenType::IDENT) && tokens[idx+1].type == TokenType::ASSIGN;
 }
+
 bool Parser::isExpressionStatement() {
     // For simplicity, treat any expression starting with an identifier or literal as an expression statement
     return curTokenIs(TokenType::IDENT) || curTokenIs(TokenType::INT_LITERAL) || curTokenIs(TokenType::FLOAT_LITERAL) ||
@@ -241,7 +208,9 @@ int Parser::parseBlock() {
 
 // Parsing methods
 int Parser::parseStatement() {
-    if (isTokenType()) {
+    if (isTokenType() && peekTokenIs(TokenType::IDENT) && tokens[idx + 2].type == TokenType::LPAREN) {
+        return parseFunction();
+    } else if (isTokenType()) {
         return parseVariableDeclaration();
     } 
     else if (isAssignmentStatement()) {
@@ -268,6 +237,28 @@ int Parser::parseStatement() {
         return -1;
     }
 }
+
+int Parser::getPrecedence(TokenType type) {
+    auto it = precedences.find(type);
+    if (it != precedences.end()) {
+        return it->second;
+    }
+    return Precedence::LOWEST;
+}
+
+bool Parser::isBinaryOperator(TokenType type) {
+    return type == TokenType::PLUS || type == TokenType::MINUS ||
+           type == TokenType::ASTERISK || type == TokenType::SLASH;
+}
+
+bool Parser::isBooleanOperator(TokenType type) {
+    return type == TokenType::EQ || type == TokenType::NOT_EQ ||
+           type == TokenType::LT || type == TokenType::LTE ||
+           type == TokenType::GT || type == TokenType::GTE ||
+           type == TokenType::AND || type == TokenType::OR;
+}
+
+// end of helper functions
 
 int Parser::parseVariableDeclaration() {
     int nodeIdx = createNode();
@@ -298,38 +289,28 @@ int Parser::parseVariableDeclaration() {
 }
 
 int Parser::parseAssignmentStatement() {
-
     int nodeIdx = createNode();
-    nodes[nodeIdx].type = "ASSIGNMENT";
-    // Set the type
-    nodes[nodeIdx].name = curToken().literal;
-    nextToken();
+    nodes[nodeIdx].name = "ASSIGNMENT";
 
+    // Ensure current token is Identifier
+    if (!curTokenIs(TokenType::IDENT)) {
+        return -1;
+    }
+    nodes[nodeIdx].type = "Identifier";
+    nodes[nodeIdx].name = curToken().literal;  // the identifier name
+    nextToken();  // Move past the identifier
 
     // Expect '='
     if (!readToken(TokenType::ASSIGN)) {
         return -1;
     }
 
-    int val = parseExpression();
-    if(val == -1) return -1;
-    nodes[nodeIdx].children.push_back(val);
-    // Expect a semicolon
-    if (!readToken(TokenType::SEMICOLON)) {
+    // Parse Expression
+    int exprIdx = parseExpression();
+    if (exprIdx == -1) {
         return -1;
     }
-
-    return nodeIdx;
-}
-
-int Parser::parseExpressionStatement() {
-    int nodeIdx = createNode();
-    nodes[nodeIdx].type = "EXPRESSION_STATEMENT";
-
-    int ret = parseExpression();
-    if(ret == -1) return ret;
-
-    nodes[nodeIdx].children.push_back(ret);
+    nodes[nodeIdx].children.push_back(exprIdx);
 
     // Expect a semicolon
     if (!readToken(TokenType::SEMICOLON)) {
@@ -343,8 +324,8 @@ int Parser::parseReturnStatement() {
     int nodeIdx = createNode();
     nodes[nodeIdx].name = "RETURN";
 
-    nextToken(); // Move to the expression
-    int ret = parseExpression();
+    nextToken();
+    int ret = parseExpressionStatement();
     if(ret == -1) return ret;
     nodes[nodeIdx].children.push_back(ret);
 
@@ -439,6 +420,21 @@ int Parser::parseWhileLoop() {
     return nodeIdx;
 }
 
+int Parser::parseExpressionStatement() {
+    int exprIdx = parseExpression();
+    if (exprIdx == -1) {
+        return -1;
+    }
+
+    // Expect a semicolon
+    if (!readToken(TokenType::SEMICOLON)) {
+        return -1;
+    }
+
+    return exprIdx;
+}
+
+
 int Parser::parseForLoop() {
     // Simplified for loop parsing
     int nodeIdx = createNode();
@@ -512,164 +508,121 @@ int Parser::parseForLoop() {
 }
 
 int Parser::parseExpression(int precedence) {
-    int nodeIdx = createNode();
-    nodes[nodeIdx].type = "EXPRESSION";
+    int nodeIdx = -1;
 
-    cerr << TokenTypeToString(curToken().type) << '\n';
-    nodes[nodeIdx].type = curToken().literal;
+    // Parse left-hand side with current precedence
+    if (curTokenIs(TokenType::IDENT)) {
+        // FunctionCall or an Identifier at first check thingy
+        int identIdx = createNode();
+        nodes[identIdx].name = curToken().literal;
+        nodes[identIdx].type = "IDENTIFIER";
+        nextToken(); // Move past the identifier
 
-    if (!readToken(TokenType::IDENT)) {
+        if (curTokenIs(TokenType::LPAREN)) {
+            // FunctionCall
+            nodeIdx = createNode();
+            nodes[nodeIdx].name = "FUNCTION CALL";
+            nodes[nodeIdx].children.push_back(identIdx);
+
+            if (!readToken(TokenType::LPAREN)) {
+                return -1;
+            }
+
+            // Parse arguments
+            int argsIdx = createNode();
+            nodes[argsIdx].name = "ARGUMENTS";
+            nodes[nodeIdx].children.push_back(argsIdx);
+
+            while (!curTokenIs(TokenType::RPAREN) && !curTokenIs(TokenType::EOF_TOKEN)) {
+                int argIdx = parseExpression();
+                if (argIdx == -1) return -1;
+                nodes[argsIdx].children.push_back(argIdx);
+
+                if (curTokenIs(TokenType::COMMA)) {
+                    readToken(TokenType::COMMA);
+                } else {
+                    break;
+                }
+            }
+
+            if (!readToken(TokenType::RPAREN)) {
+                return -1;
+            }
+
+        } else {
+            // Just an identifier
+            nodeIdx = identIdx;
+        }
+
+    } else if (curTokenIs(TokenType::INT_LITERAL) || curTokenIs(TokenType::FLOAT_LITERAL) ||
+               curTokenIs(TokenType::STRING_LITERAL) || curTokenIs(TokenType::CHAR_LITERAL) ||
+               curTokenIs(TokenType::BOOLEAN_LITERAL)) {
+        // Literal
+        nodeIdx = createNode();
+        nodes[nodeIdx].name = "LITERAL";
+        nodes[nodeIdx].type = TokenTypeToString(curToken().type);
+        nodes[nodeIdx].name = curToken().literal;
+
+        nextToken(); // Move past the literal
+
+    } else if (curTokenIs(TokenType::LPAREN)) {
+        // Grouped Expression
+        readToken(TokenType::LPAREN);
+        nodeIdx = parseExpression();
+        if (!readToken(TokenType::RPAREN)) {
+            return -1;
+        }
+
+    } else if (curTokenIs(TokenType::MINUS) || curTokenIs(TokenType::BANG)) {
+        int unaryNodeIdx = createNode();
+        nodes[unaryNodeIdx].name = "UNARY OPERATOR";
+        nodes[unaryNodeIdx].type = curToken().literal;
+
+        nextToken(); // Move past the unary operator
+
+        int operandIdx = parseExpression(Precedence::PREFIX);
+        if (operandIdx == -1) {
+            return -1;
+        }
+        nodes[unaryNodeIdx].children.push_back(operandIdx);
+
+        nodeIdx = unaryNodeIdx;
+    } else {
+        errors.push_back("expected expression, got " + TokenTypeToString(curToken().type) + " instead");
         return -1;
     }
 
+    // Now, handle binary operators (left-associative)
+    while (true) {
+        int currentPrecedence = getPrecedence(curToken().type);
+
+        if (currentPrecedence < precedence) {
+            break;
+        }
+
+        // Handle BinaryOperator or BooleanOperator
+        TokenType opType = curToken().type;
+        if (isBinaryOperator(opType) || isBooleanOperator(opType)) {
+            int binNodeIdx = createNode();
+            nodes[binNodeIdx].name = "BINARY OPERATOR";
+            nodes[binNodeIdx].type = curToken().literal;
+
+            nextToken(); // Move past the operator
+
+            int rightIdx = parseExpression(currentPrecedence);
+            if (rightIdx == -1) {
+                return -1;
+            }
+
+            nodes[binNodeIdx].children.push_back(nodeIdx);
+            nodes[binNodeIdx].children.push_back(rightIdx);
+
+            nodeIdx = binNodeIdx;
+        } else {
+            errors.push_back("expected binary operator, got " + TokenTypeToString(curToken().type) + " instead");
+            break;
+        }
+    }
 
     return nodeIdx;
-
-    // // Parse the left-hand side based on the current token
-    // switch (curToken().type) {
-    //     case TokenType::IDENT:
-    //         leftExp = parseIdentifier();
-    //         break;
-    //     case TokenType::INT_LITERAL:
-    //     case TokenType::FLOAT_LITERAL:
-    //     case TokenType::STRING_LITERAL:
-    //     case TokenType::CHAR_LITERAL:
-    //     case TokenType::BOOLEAN_LITERAL:
-    //         leftExp = parseLiteral();
-    //         break;
-    //     case TokenType::BANG:
-    //     case TokenType::MINUS:
-    //         leftExp = parsePrefixExpression();
-    //         break;
-    //     case TokenType::LPAREN:
-    //         leftExp = parseGroupedExpression();
-    //         break;
-    //     default:
-    //         // Handle error
-    //         return nullptr;
-    // }
-
-    // while (!peekTokenIs(TokenType::SEMICOLON) && precedence < peekPrecedence()) {
-    //     switch (peekToken.type) {
-    //         case TokenType::PLUS:
-    //         case TokenType::MINUS:
-    //         case TokenType::SLASH:
-    //         case TokenType::ASTERISK:
-    //         case TokenType::EQ:
-    //         case TokenType::NOT_EQ:
-    //         case TokenType::LT:
-    //         case TokenType::LTE:
-    //         case TokenType::GT:
-    //         case TokenType::GTE:
-    //         case TokenType::AND:
-    //         case TokenType::OR:
-    //             nextToken();
-    //             leftExp = parseInfixExpression(std::move(leftExp));
-    //             break;
-    //         case TokenType::LPAREN:
-    //             nextToken();
-    //             leftExp = parseFunctionCall(std::move(leftExp));
-    //             break;
-    //         default:
-    //             return leftExp;
-    //     }
-    // }
-
-    // return leftExp;
 }
-
-// // Prefix parsing functions
-// std::unique_ptr<Expression> Parser::parseIdentifier() {
-//     return std::make_unique<Identifier>(curToken.literal);
-// }
-
-// std::unique_ptr<Expression> Parser::parseLiteral() {
-//     switch (curToken.type) {
-//         case TokenType::INT_LITERAL:
-//             return std::make_unique<Literal>(Literal::Type::Integer, curToken.literal);
-//         case TokenType::FLOAT_LITERAL:
-//             return std::make_unique<Literal>(Literal::Type::Float, curToken.literal);
-//         case TokenType::STRING_LITERAL:
-//             return std::make_unique<Literal>(Literal::Type::String, curToken.literal);
-//         case TokenType::CHAR_LITERAL:
-//             return std::make_unique<Literal>(Literal::Type::Char, curToken.literal);
-//         case TokenType::BOOLEAN_LITERAL:
-//             return std::make_unique<Literal>(Literal::Type::Boolean, curToken.literal);
-//         default:
-//             return nullptr;
-//     }
-// }
-
-// std::unique_ptr<Expression> Parser::parseGroupedExpression() {
-//     nextToken(); // Consume '('
-
-//     auto exp = parseExpression();
-
-//     if (!expectPeek(TokenType::RPAREN)) {
-//         return nullptr;
-//     }
-
-//     return exp;
-// }
-
-// std::unique_ptr<Expression> Parser::parsePrefixExpression() {
-//     auto expr = std::make_unique<UnaryExpression>();
-
-//     expr->op = curToken.literal;
-
-//     nextToken();
-
-//     expr->operand = parseExpression(Precedence::PREFIX);
-
-//     return expr;
-// }
-
-// std::unique_ptr<Expression> Parser::parseFunctionCall(std::unique_ptr<Expression> function) {
-//     auto expr = std::make_unique<FunctionCall>();
-
-//     expr->functionName = function->tokenLiteral();
-//     expr->arguments = parseExpressionList(TokenType::RPAREN);
-
-//     return expr;
-// }
-
-// std::vector<std::unique_ptr<Expression>> Parser::parseExpressionList(TokenType end) {
-//     std::vector<std::unique_ptr<Expression>> args;
-
-//     if (peekTokenIs(end)) {
-//         nextToken();
-//         return args;
-//     }
-
-//     nextToken();
-//     args.push_back(parseExpression());
-
-//     while (peekTokenIs(TokenType::COMMA)) {
-//         nextToken(); // Consume ','
-//         nextToken(); // Move to next expression
-//         args.push_back(parseExpression());
-//     }
-
-//     if (!expectPeek(end)) {
-//         return {};
-//     }
-
-//     return args;
-// }
-
-// // Infix parsing functions
-// std::unique_ptr<Expression> Parser::parseInfixExpression(std::unique_ptr<Expression> left) {
-//     auto expr = std::make_unique<BinaryExpression>();
-
-//     expr->left = std::move(left);
-//     expr->op = curToken.literal;
-
-//     int precedence = curPrecedence();
-
-//     nextToken();
-
-//     expr->right = parseExpression(precedence);
-
-//     return expr;
-// }
-
