@@ -75,6 +75,7 @@ int Parser::parseFunction() {
         nodes[nodeIdx].name = tokens[idx-1].literal;
     }
     valid &= readToken(TokenType::LPAREN);
+
     int ret = parseArguments();
     if(ret == -1) return -1;
     else {
@@ -82,6 +83,7 @@ int Parser::parseFunction() {
     }
     valid &= readToken(TokenType::RPAREN);
     valid &= readToken(TokenType::LBRACE);
+
     ret = parseBlock();
     if(ret == -1) return -1;
     else {
@@ -325,7 +327,7 @@ int Parser::parseReturnStatement() {
     nodes[nodeIdx].name = "RETURN";
 
     nextToken();
-    int ret = parseExpressionStatement();
+    int ret = parseExpression();
     if(ret == -1) return ret;
     nodes[nodeIdx].children.push_back(ret);
 
