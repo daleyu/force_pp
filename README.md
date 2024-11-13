@@ -164,6 +164,8 @@ To build and lex any file:
 ### Demos 
 All demos for this language can be found in the `./demos` folder. 
 Please download the files and then see it from there. Thanks
+Look at this youtube link to watch the demo: https://www.youtube.com/watch?v=HVJFjCcfCzY
+
 
 ##### References 
 
