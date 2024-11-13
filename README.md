@@ -163,6 +163,7 @@ To build and lex any file:
 
 ### Demos 
 Please use the youtube link. The videos couldn't be added to the repo cause they were too big.
+For the deliverables, you can read the above portions and inspect our files in parser and ast. We also have the test files in tests. Thanks!
 Look at this youtube link to watch the demo: https://www.youtube.com/watch?v=HVJFjCcfCzY
 
 
