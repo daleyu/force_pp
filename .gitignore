@@ -33,6 +33,7 @@
 
 .DS_Store
 .vscode
+main
 run_tests
 lexer_test
 parser_test
