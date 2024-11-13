@@ -52,6 +52,9 @@ public:
     bool isType(TokenType t) const;
     bool isExpressionStatement();
     bool isAssignmentStatement();
+    int getPrecedence(TokenType type);
+    bool isBinaryOperator(TokenType type);
+    bool isBooleanOperator(TokenType type);
 //     int peekPrecedence() const;
 //     int curPrecedence() const;
 //     bool isAssignmentStatement() const;
@@ -92,21 +95,21 @@ public:
 //     // Infix parsing functions
 //     std::unique_ptr<Expression> parseInfixExpression(std::unique_ptr<Expression> left);
 
-//     // Precedence levels
-//     enum Precedence {
-//         LOWEST,
-//         OR,           // ||
-//         AND,          // &&
-//         EQUALS,       // == or !=
-//         LESSGREATER,  // > or <
-//         SUM,          // + or -
-//         PRODUCT,      // * or /
-//         PREFIX,       // -X or !X
-//         CALL          // function calls
-//     };
+    // Precedence levels
+    enum Precedence {
+        LOWEST,
+        OR,           // ||
+        AND,          // &&
+        EQUALS,       // == or !=
+        LESSGREATER,  // > or <
+        SUM,          // + or -
+        PRODUCT,      // * or /
+        PREFIX,       // -X or !X
+        CALL          // function calls
+    };
 
-//     // Maps for operator precedences
-//     std::unordered_map<TokenType, Precedence> precedences;
+    // Maps for operator precedences
+    std::unordered_map<TokenType, Precedence> precedences;
 };
 
 #endif // PARSER_H
