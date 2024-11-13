@@ -659,8 +659,8 @@ int Parser::parseExpression(int precedence) {
 
     // Now, handle binary operators (left-associative)
     while (true) {
-        // stop when encountering a closing parenthesis
-        if (curTokenIs(TokenType::RPAREN)) {
+        // stop when encountering a closing parenthesis or comma
+        if (curTokenIs(TokenType::RPAREN) || curTokenIs(TokenType::COMMA)) {
             break;
         }
 
