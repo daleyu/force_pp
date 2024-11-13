@@ -162,8 +162,7 @@ To build and lex any file:
 2. ./main file_name 
 
 ### Demos 
-All demos for this language can be found in the `./demos` folder. 
-Please download the files and then see it from there. Thanks
+Please use the youtube link. The videos couldn't be added to the repo cause they were too big.
 Look at this youtube link to watch the demo: https://www.youtube.com/watch?v=HVJFjCcfCzY
 
 
