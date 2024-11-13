@@ -171,7 +171,7 @@ void test_program3() {
         Token(TokenType::ASSIGN, "="),
         Token(TokenType::INT_LITERAL, "1"),
         Token(TokenType::SEMICOLON, ";"),
-        Token(TokenType::FOR, "forn"), // Assuming 'forn' is recognized as 'FOR' keyword
+        Token(TokenType::FORN, "forn"), 
         Token(TokenType::LPAREN, "("),
         Token(TokenType::IDENT, "i"),
         Token(TokenType::COMMA, ","),
