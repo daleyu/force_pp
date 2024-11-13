@@ -47,6 +47,7 @@ std::string TokenTypeToString(TokenType type) {
         case TokenType::VI: return "VI";
         case TokenType::FOR: return "FOR";
         case TokenType::WHILE: return "WHILE";
+        case TokenType::FORN: return "FORN";
         // Add cases for any other TokenType enums you've added
         default: return "UNKNOWN";
     }

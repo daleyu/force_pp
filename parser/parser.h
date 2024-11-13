@@ -60,6 +60,7 @@ public:
     int parseExpressionStatement();
     int parseForLoop();
     int parseWhileLoop();
+    int parseFornLoop();
     int parseIfStatement();
     int parseReturnStatement();
     int parseBlock();

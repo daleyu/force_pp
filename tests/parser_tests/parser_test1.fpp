@@ -1,10 +1,6 @@
 int solve() {
-	
-	int a = d;
-	e;
-	while(c) {
 
-	}
-	return e;
+	for(int i = a; i < n;) {
 
+	}	
 }

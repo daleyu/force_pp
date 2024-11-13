@@ -223,7 +223,10 @@ int Parser::parseStatement() {
     }
     else if (curTokenIs(TokenType::FOR)) {
         return parseForLoop();
-    } else if (curTokenIs(TokenType::WHILE)) {
+    } else if (curTokenIs(TokenType::FORN)) {
+        return parseFornLoop();
+    }
+        else if (curTokenIs(TokenType::WHILE)) {
         return parseWhileLoop();
     }
      else if (curTokenIs(TokenType::IF)) {
@@ -488,6 +491,62 @@ int Parser::parseForLoop() {
         int empty = createNode();
         nodes[empty].type = "EMPTY";
         nodes[nodeIdx].children.push_back(empty);
+    }
+
+    if (!readToken(TokenType::RPAREN)) {
+        return -1;
+    }
+
+    if (!readToken(TokenType::LBRACE)) {
+        return -1;
+    }
+    
+    int cond = parseBlock();
+    if(cond == -1) return cond;
+    else nodes[nodeIdx].children.push_back(cond);
+
+    if (!readToken(TokenType::RBRACE)) {
+        return -1;
+    }
+
+    return nodeIdx;
+}
+
+int Parser::parseFornLoop() {
+    // Simplified for loop parsing
+    int nodeIdx = createNode();
+    nodes[nodeIdx].type = "FORN";
+
+    if (!readToken(TokenType::FORN)) {
+        return -1;
+    }
+    if (!readToken(TokenType::LPAREN)) {
+        return -1;
+    }
+
+    // Parse initializer
+    if(!readToken(TokenType::IDENT)) {
+        return -1;
+    }
+
+    string label = tokens[idx-1].literal;
+    int childIdx = createNode();
+    nodes[childIdx].type = "DECLARATION";
+    nodes[childIdx].varType = "int";
+    nodes[childIdx].name = curToken().literal;
+
+    if(!readToken(TokenType::COMMA)) {
+        return -1;
+    }
+
+    // Parse update
+    if (!curTokenIs(TokenType::RPAREN)) {  
+        int ret = parseExpression();
+        if(ret == -1) return ret;
+        nodes[nodeIdx].children.push_back(ret);
+    }
+    else {
+        // return -1;
     }
 
     if (!readToken(TokenType::RPAREN)) {

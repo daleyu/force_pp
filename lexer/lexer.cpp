@@ -13,6 +13,7 @@ std::unordered_map<std::string, TokenType> keywords = {
     {"varchar", TokenType::VARCHAR},
     {"vi", TokenType::VI},
     {"void", TokenType::VOID},
+    {"forn", TokenType::FORN},
     {"for", TokenType::FOR},
     {"forn", TokenType::FOR},
     {"while", TokenType::WHILE},
