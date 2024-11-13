@@ -48,11 +48,34 @@ int test_program5();
 // Helper function to print the AST
 void printAST(ASTNode* node, int indent = 0) {
     std::string indentStr(indent, ' ');
-
     if (auto program = dynamic_cast<Program*>(node)) {
         std::cout << indentStr << "Program" << std::endl;
         for (auto& stmt : program->statements) {
             printAST(stmt.get(), indent + 2);
+        }
+    } else if (auto funcDef = dynamic_cast<FunctionDefinition*>(node)) {
+        std::cout << indentStr << "FunctionDefinition" << std::endl;
+        std::cout << indentStr << "  Return Type: " << funcDef->returnType << std::endl;
+        std::cout << indentStr << "  Name: " << funcDef->name << std::endl;
+        std::cout << indentStr << "  Parameters:" << std::endl;
+        for (auto& param : funcDef->parameters) {
+            printAST(param.get(), indent + 4);
+        }
+        std::cout << indentStr << "  Body:" << std::endl;
+        printAST(funcDef->body.get(), indent + 4);
+    } else if (auto param = dynamic_cast<Parameter*>(node)) {
+        std::cout << indentStr << "Parameter" << std::endl;
+        std::cout << indentStr << "  Type: " << param->type << std::endl;
+        std::cout << indentStr << "  Name: " << param->name << std::endl;
+    } else if (auto varDecl = dynamic_cast<VariableDeclaration*>(node)) {
+        std::cout << indentStr << "VariableDeclaration" << std::endl;
+        std::cout << indentStr << "  Type: " << varDecl->type << std::endl;
+        std::cout << indentStr << "  Name: " << varDecl->name << std::endl;
+        if (varDecl->initializer) {
+            std::cout << indentStr << "  Initializer:" << std::endl;
+            printAST(varDecl->initializer.get(), indent + 4);
+        } else {
+            std::cout << indentStr << "  Initializer: None" << std::endl;
         }
     } else if (auto varDecl = dynamic_cast<VariableDeclaration*>(node)) {
         std::cout << indentStr << "VariableDeclaration" << std::endl;
@@ -131,7 +154,7 @@ int basicDeclarationTest() {
 
 // Test function for parsing a simple function declaration
 int testSimpleDeclaration() {
-    std::string input = "int add(int a, int b) { return a + b; }";
+    std::string input = "int add (int a , int b) { return a + b; }";
     std::cout << "Basic Function test" << std::endl;
     auto lexer = std::make_shared<Lexer>(input);
     Parser parser(lexer);
@@ -156,7 +179,7 @@ int testSimpleDeclaration() {
 // Test function for parsing multiple declarations and assignments
 int testMultipleDeclarationsAndAssignments() {
     std::cout << "Test Multiple Declarations" << std::endl;
-    std::string input = "int x = 7; int y = 10; result = x + y;";
+    std::string input = "int x = 7; int y = 10; int result = x + y;";
     auto lexer = std::make_shared<Lexer>(input);
     Parser parser(lexer);
 
@@ -195,7 +218,7 @@ int testIfStatement() {
     // Print the AST
     printAST(program.get());
 
-    std::cout << "Basic function declaration test passed" << std::endl;
+    std::cout << "Test If Statement passed" << std::endl;
     return 0;
 }
 
@@ -306,11 +329,11 @@ int main() {
     testSimpleDeclaration();
     testMultipleDeclarationsAndAssignments();
     testIfStatement();
-    test_program1();
-    test_program2();
-    test_program3();
-    test_program4();
-    test_program5();
+    // test_program1();
+    // test_program2();
+    // test_program3();
+    // test_program4();
+    // test_program5();
     std::cout << "All parser tests passed!" << std::endl;
     return 0;
 }

@@ -115,8 +115,26 @@ bool Parser::isExpressionStatement() const {
 
 // Parsing methods
 std::unique_ptr<Statement> Parser::parseStatement() {
-    if (isType(curToken.type) && peekTokenIs(TokenType::IDENT)) {
-        return parseVariableDeclaration();
+    if (isType(curToken.type)) {
+        // Read the type
+        std::string typeName = curToken.literal;
+
+        // Expect IDENT
+        if (!expectPeek(TokenType::IDENT)) {
+            return nullptr;
+        }
+
+        // Read the identifier
+        std::string identName = curToken.literal;
+
+        // Now, depending on the next token, decide what to parse
+        if (peekTokenIs(TokenType::LPAREN)) {
+            // It's a function definition
+            return parseFunctionDefinition(typeName, identName);
+        } else {
+            // It's a variable declaration
+            return parseVariableDeclaration(typeName, identName);
+        }
     } else if (isAssignmentStatement()) {
         return parseAssignmentStatement();
     } else if (curTokenIs(TokenType::RETURN)) {
@@ -140,18 +158,12 @@ std::unique_ptr<Statement> Parser::parseStatement() {
     }
 }
 
-std::unique_ptr<Statement> Parser::parseVariableDeclaration() {
+std::unique_ptr<Statement> Parser::parseVariableDeclaration(const std::string& typeName, const std::string& identName) {
     auto stmt = std::make_unique<VariableDeclaration>();
 
-    // Set the type
-    stmt->type = curToken.literal;
-
-    // Expect an identifier
-    if (!expectPeek(TokenType::IDENT)) {
-        return nullptr;
-    }
-
-    stmt->name = curToken.literal;
+    // Set the type and name
+    stmt->type = typeName;
+    stmt->name = identName;
 
     // Optional initializer
     if (peekTokenIs(TokenType::ASSIGN)) {
@@ -166,6 +178,84 @@ std::unique_ptr<Statement> Parser::parseVariableDeclaration() {
     }
 
     return stmt;
+}
+
+
+std::unique_ptr<Statement> Parser::parseFunctionDefinition(const std::string& returnType, const std::string& functionName) {
+    auto funcDef = std::make_unique<FunctionDefinition>();
+
+    // Set the return type and name
+    funcDef->returnType = returnType;
+    funcDef->name = functionName;
+
+    // Expect '('
+    if (!expectPeek(TokenType::LPAREN)) {
+        return nullptr;
+    }
+
+    // Parse parameters
+    funcDef->parameters = parseParameterList();
+
+    // Expect '{' after parameters
+    if (!expectPeek(TokenType::LBRACE)) {
+        return nullptr;
+    }
+
+    // Parse function body
+    funcDef->body = parseBlock();
+
+    return funcDef;
+}
+
+std::vector<std::unique_ptr<Parameter>> Parser::parseParameterList() {
+    std::vector<std::unique_ptr<Parameter>> parameters;
+
+    if (peekTokenIs(TokenType::RPAREN)) {
+        nextToken(); // Consume ')'
+        return parameters;
+    }
+
+    nextToken(); // Move to the first parameter's type
+
+    while (true) {
+        auto param = parseParameter();
+        if (param == nullptr) {
+            return parameters; // Error in parameter parsing
+        }
+        parameters.push_back(std::move(param));
+
+        if (peekTokenIs(TokenType::COMMA)) {
+            nextToken(); // Consume ','
+            nextToken(); // Move to next parameter's type
+        } else if (peekTokenIs(TokenType::RPAREN)) {
+            nextToken(); // Consume ')'
+            break;
+        } else {
+            errors.push_back("Expected ',' or ')' after parameter, got " + TokenTypeToString(peekToken.type));
+            return parameters;
+        }
+    }
+
+    return parameters;
+}
+
+std::unique_ptr<Parameter> Parser::parseParameter() {
+    if (!isType(curToken.type)) {
+        errors.push_back("Expected parameter type, got " + TokenTypeToString(curToken.type));
+        return nullptr;
+    }
+
+    auto param = std::make_unique<Parameter>();
+    param->type = curToken.literal;
+
+    if (!expectPeek(TokenType::IDENT)) {
+        return nullptr;
+    }
+    param->name = curToken.literal;
+
+    nextToken(); // Move to the next token after the identifier
+
+    return param;
 }
 
 std::unique_ptr<Statement> Parser::parseAssignmentStatement() {
@@ -350,7 +440,7 @@ std::unique_ptr<Statement> Parser::parseForLoop() {
 
     // Parse initializer
     if (isType(curToken.type) && peekTokenIs(TokenType::IDENT)) {
-        stmt->initializer = parseVariableDeclaration();
+        stmt->initializer = parseVariableDeclaration(curToken.literal, peekToken.literal);
     } else if (curTokenIs(TokenType::SEMICOLON)) {
         stmt->initializer = nullptr;
     } else {

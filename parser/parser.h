@@ -38,9 +38,12 @@ private:
 
     // Parsing methods
     std::unique_ptr<Statement> parseStatement();
-    std::unique_ptr<Statement> parseVariableDeclaration();
+    std::unique_ptr<Statement> parseVariableDeclaration(const std::string& typeName, const std::string& ident);
     std::unique_ptr<Statement> parseAssignmentStatement();
     std::unique_ptr<Statement> parseExpressionStatement();
+    std::unique_ptr<Statement> parseFunctionDefinition(const std::string& typeName, const std::string& ident);
+    std::vector<std::unique_ptr<Parameter> > parseParameterList(); 
+std::unique_ptr<Parameter> parseParameter();
     std::unique_ptr<Statement> parseForLoop();
     std::unique_ptr<Statement> parseForNLoop();
     std::unique_ptr<Statement> parseWhileLoop();
