@@ -186,7 +186,7 @@ bool Parser::isType(TokenType t) const {
 }
 
 bool Parser::isAssignmentStatement()  {
-    return curTokenIs(TokenType::IDENT) && tokens[idx+1].type == TokenType::ASSIGN;
+    return curTokenIs(TokenType::IDENT) && idx + 1 < tokens.size() && tokens[idx+1].type == TokenType::ASSIGN;
 }
 
 bool Parser::isExpressionStatement() {
@@ -210,12 +210,11 @@ int Parser::parseBlock() {
 
 // Parsing methods
 int Parser::parseStatement() {
-    if (isTokenType() && peekTokenIs(TokenType::IDENT) && tokens[idx + 2].type == TokenType::LPAREN) {
-        return parseFunction();
+    if (isTokenType() && peekTokenIs(TokenType::IDENT) && idx + 2 < tokens.size() && tokens[idx + 2].type == TokenType::LPAREN) {
+    return parseFunction();
     } else if (isTokenType()) {
         return parseVariableDeclaration();
-    } 
-    else if (isAssignmentStatement()) {
+    } else if (isAssignmentStatement()) {
         return parseAssignmentStatement();
     }
      else if (curTokenIs(TokenType::RETURN)) {
@@ -453,7 +452,7 @@ int Parser::parseForLoop() {
     }
 
     // Parse initializer
-    if (isType(curToken().type) && tokens[idx+1].type == TokenType::IDENT) {
+    if (isType(curToken().type) && idx + 1 < tokens.size() && tokens[idx + 1].type == TokenType::IDENT) {
         int ret = parseVariableDeclaration();
         if(ret == -1) return ret;
         nodes[nodeIdx].children.push_back(ret);
@@ -572,7 +571,7 @@ int Parser::parseExpression(int precedence) {
     int nodeIdx = -1;
 
     // Stop parsing if an unexpected closing parenthesis is encountered
-    if (curTokenIs(TokenType::RPAREN)) {
+    if (curTokenIs(TokenType::RPAREN) || curTokenIs(TokenType::EOF_TOKEN) || curTokenIs(TokenType::COMMA)) {
         return -1;
     }
 
