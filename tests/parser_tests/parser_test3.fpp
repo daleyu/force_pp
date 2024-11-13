@@ -1,4 +1,7 @@
-int x = 7;
-if (x == 7) {
-    x = x - 1;
+int solve() {
+	int a = d;
+    for (int i = 0; i <= 10; i += 1){
+        int d;
+    }
+	return e;
 }

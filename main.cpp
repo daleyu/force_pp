@@ -43,6 +43,12 @@ int main(int argc, char* argv[]) {
 
     parser.printNodes();
 
+    //print out the errors
+    std::vector<std::string> errors = parser.Errors();
+    for (std::string error : errors) {
+        std::cout << error << '\n';
+    }
+
 
 
     return 0;

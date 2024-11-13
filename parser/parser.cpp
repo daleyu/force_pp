@@ -571,9 +571,14 @@ int Parser::parseFornLoop() {
 int Parser::parseExpression(int precedence) {
     int nodeIdx = -1;
 
+    // Stop parsing if an unexpected closing parenthesis is encountered
+    if (curTokenIs(TokenType::RPAREN)) {
+        return -1;
+    }
+
     // Parse left-hand side with current precedence
     if (curTokenIs(TokenType::IDENT)) {
-        // FunctionCall or an Identifier at first check thingy
+        // FunctionCall or an Identifier
         int identIdx = createNode();
         nodes[identIdx].name = curToken().literal;
         nodes[identIdx].type = "IDENTIFIER";
@@ -649,12 +654,16 @@ int Parser::parseExpression(int precedence) {
 
         nodeIdx = unaryNodeIdx;
     } else {
-        errors.push_back("expected expression, got " + TokenTypeToString(curToken().type) + " instead");
         return -1;
     }
 
     // Now, handle binary operators (left-associative)
     while (true) {
+        // stop when encountering a closing parenthesis or comma
+        if (curTokenIs(TokenType::RPAREN) || curTokenIs(TokenType::COMMA)) {
+            break;
+        }
+
         int currentPrecedence = getPrecedence(curToken().type);
 
         if (currentPrecedence < precedence) {
@@ -670,7 +679,7 @@ int Parser::parseExpression(int precedence) {
 
             nextToken(); // Move past the operator
 
-            int rightIdx = parseExpression(currentPrecedence);
+            int rightIdx = parseExpression(currentPrecedence + 1);
             if (rightIdx == -1) {
                 return -1;
             }
@@ -680,7 +689,6 @@ int Parser::parseExpression(int precedence) {
 
             nodeIdx = binNodeIdx;
         } else {
-            errors.push_back("expected binary operator, got " + TokenTypeToString(curToken().type) + " instead");
             break;
         }
     }

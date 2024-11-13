@@ -142,6 +142,7 @@ You can find our parsing algorithm in `./parser`.
 *How our Parsing algorithm works*
 Our parser is a recursive descent parser. And it’s a “top down operator precedence” parser, sometimes called “Pratt parser”.
 
+- Our algorthim works
 
 ### Sample Input Programs
 Our sample input programs can be found in `/test-files/parser_tests` The first 4 are different features and parsing nesting for force_pp. The last 
