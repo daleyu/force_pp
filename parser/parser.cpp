@@ -7,7 +7,7 @@
 using namespace std;
 
 // // Constructor
-Parser::Parser(std::vector<Token> t) 
+Parser::Parser(std::vector<Token> t)
 {
 
     idx = 0;
@@ -141,12 +141,25 @@ Token Parser::curToken() {
     return tokens[idx];
 }
 
+/**
+ * Checks if the current token matches the specified token type.
+ *
+ * @param t The token type to compare with the current token.
+ * @return true if the current token's type is equal to the specified type, false otherwise.
+ */
 bool Parser::curTokenIs(TokenType t) {
     if(idx >= (int)tokens.size()) idx = tokens.size()-1;
 
     return tokens[idx].type == t;
 }
 
+/**
+ * Advances the parser to the next token if the current token matches the specified token type.
+ *
+ * @param t The token type to compare with the current token.
+ * @return true if the current token's type is equal to the specified type and the parser advanced,
+ *         false otherwise.
+ */
 bool Parser::readToken(TokenType t) {
     if(idx >= (int)tokens.size()) idx = tokens.size()-1;
     if(tokens[idx].type == t) {
@@ -154,6 +167,37 @@ bool Parser::readToken(TokenType t) {
         return true;
     }
     return false;
+}
+
+
+bool Parser::peekTokenIs(TokenType t){
+    if (idx + 1 >= (int)tokens.size()) return false;
+    return tokens[idx + 1].type == t;
+}
+
+/**
+ * Ensures the next token matches the specified token type.
+ *
+ * @param t The token type to compare with the next token.
+ * @return true if the next token's type is equal to the specified type and advances the parser, false otherwise.
+ */
+bool Parser::expectPeek(TokenType t) {
+    if (peekTokenIs(t)) {
+        nextToken();
+        return true;
+    } else {
+        peekError(t);
+        return false;
+    }
+}
+
+/**
+ * Records an error message when the next token does not match the expected token type.
+ */
+void Parser::peekError(TokenType t) {
+    std::string msg = "Unexpected Token Error: Expected " + TokenTypeToString(t) 
+                      + ", got " + TokenTypeToString(tokens[idx + 1].type) + " instead";
+    errors.push_back(msg);
 }
 
 bool Parser::readTokenType() {
@@ -263,6 +307,17 @@ int Parser::parseStatement() {
     }
 }
 
+bool Parser::isExpressionStatement(){
+    return curTokenIs(TokenType::IDENT) || curTokenIs(TokenType::INT_LITERAL) ||
+           curTokenIs(TokenType::FLOAT_LITERAL) || curTokenIs(TokenType::STRING_LITERAL) ||
+           curTokenIs(TokenType::CHAR_LITERAL) || curTokenIs(TokenType::BOOLEAN_LITERAL);
+}
+
+bool Parser::isAssignmentStatement() {
+    // Ensure current token is an identifier and the next token is an assignment operator
+    return curTokenIs(TokenType::IDENT) && peekTokenIs(TokenType::ASSIGN);
+}
+
 int Parser::parseVariableDeclaration() {
     int nodeIdx = createNode();
     nodes[nodeIdx].name = "DECLARATION";
@@ -278,7 +333,7 @@ int Parser::parseVariableDeclaration() {
     // Optional initializer
     if (curTokenIs(TokenType::ASSIGN)) {
         nextToken(); // Consume ASSIGN token
-        int ret = parseExpression();
+        int ret = parseExpressionStatement();
         if(ret == -1) return -1;
         nodes[nodeIdx].children.push_back(ret);
     }
@@ -289,6 +344,10 @@ int Parser::parseVariableDeclaration() {
     }
 
     return nodeIdx;
+}
+
+int Parser::parseAssignmentStatement() {
+    return -1;
 }
 
 // std::unique_ptr<Statement> Parser::parseAssignmentStatement() {
@@ -313,6 +372,9 @@ int Parser::parseVariableDeclaration() {
 //     return stmt;
 // }
 
+int Parser::parseExpressionStatement() {
+    return -1;
+}
 // std::unique_ptr<Statement> Parser::parseExpressionStatement() {
 //     auto stmt = std::make_unique<ExpressionStatement>();
 
@@ -326,12 +388,12 @@ int Parser::parseVariableDeclaration() {
 //     return stmt;
 // }
 
-std::unique_ptr<Statement> Parser::parseReturnStatement() {
+int Parser::parseReturnStatement() {
     int nodeIdx = createNode();
     nodes[nodeIdx].name = "RETURN";
 
     nextToken(); // Move to the expression
-    int ret = parseExpression();
+    int ret = parseExpressionStatement();
     if(ret == -1) return ret;
     nodes[nodeIdx].children.push_back(ret);
 
@@ -345,6 +407,9 @@ std::unique_ptr<Statement> Parser::parseReturnStatement() {
 
 
 
+int Parser::parseIfStatement(){
+    return -1;
+}
 // std::unique_ptr<Statement> Parser::parseIfStatement() {
 //     auto stmt = std::make_unique<IfStatement>();
 
@@ -379,6 +444,9 @@ std::unique_ptr<Statement> Parser::parseReturnStatement() {
 //     return stmt;
 // }
 
+int Parser::parseWhileLoop(){
+    return -1;
+}
 // std::unique_ptr<Statement> Parser::parseWhileLoop() {
 //     auto stmt = std::make_unique<WhileLoop>();
 
@@ -403,6 +471,9 @@ std::unique_ptr<Statement> Parser::parseReturnStatement() {
 //     return stmt;
 // }
 
+int Parser::parseForLoop(){
+    return -1;
+}
 // std::unique_ptr<Statement> Parser::parseForLoop() {
 //     // Simplified for loop parsing
 //     auto stmt = std::make_unique<ForLoop>();
@@ -459,6 +530,7 @@ std::unique_ptr<Statement> Parser::parseReturnStatement() {
 
 int Parser::parseExpression(int precedence) {
     return -1;
+}
     // std::unique_ptr<Expression> leftExp;
 
     // // Parse the left-hand side based on the current token
@@ -512,7 +584,6 @@ int Parser::parseExpression(int precedence) {
     // }
 
     // return leftExp;
-}
 
 // // Prefix parsing functions
 // std::unique_ptr<Expression> Parser::parseIdentifier() {

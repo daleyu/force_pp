@@ -13,7 +13,10 @@
 class Parser {
 public:
     Parser(std::vector<Token>);
-    std::vector<std::string> Errors() const;
+    std::vector<std::string> errors;
+    std::vector<std::string> Errors() const{
+        return errors;
+    }
     int createNode();
     int idx;
     std::vector<Token> tokens;
@@ -35,30 +38,44 @@ public:
 //     Token peekToken;
 //     std::vector<std::string> errors;
 
-//     // Token-related methods
-//     void peekError(TokenType t);
+// Token-related methods
     void nextToken();
     bool curTokenIs(TokenType t);
+    bool peekTokenIs(TokenType t);
+    bool expectPeek(TokenType t);
+    void peekError(TokenType t);
+//     void peekError(TokenType t);
 //     bool peekTokenIs(TokenType t) const;
 //     bool expectPeek(TokenType t);
 
-//     // Helper methods
+    // Helper methods
     bool isType(TokenType t) const;
+    bool isExpressionStatement();
+    bool isAssignmentStatement();
 //     int peekPrecedence() const;
 //     int curPrecedence() const;
 //     bool isAssignmentStatement() const;
 //     bool isExpressionStatement() const;
 
-//     // Parsing methods
-        int parseStatement();
-        int parseVariableDeclaration();
+    // Parsing methods
+    int parseStatement();
+    int parseAssignmentStatement();
+    int parseVariableDeclaration();
+    int parseVariableDeclarationList();
+    int parseForLoop();
+    int parseWhileLoop();
+    int parseIfStatement();
+    int parseReturnStatement();
+    int parseExpression(int precedence = 0);
+    int parseExpressionStatement();
+    int parseBlock();
+
 //     std::unique_ptr<Statement> parseAssignmentStatement();
 //     std::unique_ptr<Statement> parseExpressionStatement();
 //     std::unique_ptr<Statement> parseForLoop();
 //     std::unique_ptr<Statement> parseWhileLoop();
 //     std::unique_ptr<Statement> parseIfStatement();
 //     std::unique_ptr<Statement> parseReturnStatement();
-        int parseBlock();
 //     std::unique_ptr<Expression> parseExpression(int precedence = 0);
 //     std::vector<std::unique_ptr<Expression> > parseExpressionList(TokenType end);
     
