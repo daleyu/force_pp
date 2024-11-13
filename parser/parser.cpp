@@ -7,29 +7,33 @@
 using namespace std;
 
 // // Constructor
-Parser::Parser(std::vector<Token> t)
+Parser::Parser(std::vector<Token> t) 
 {
 
     idx = 0;
     tokens = t;
 }
 
+void Parser::dfs(int cur, int depth) {
+
+    for(int i = 0; i < depth; i++) {
+        cout << "|";
+        if(i < depth-1) cout << "  ";
+    }
+
+    if(depth) cout << "--";
+    
+    if(nodes[cur].type.size()) cout << nodes[cur].type << ' ';
+    if(nodes[cur].varType.size()) cout << nodes[cur].varType << ' ';
+    cout <<  nodes[cur].name << '\n';
+    for(int z : nodes[cur].children) {
+        dfs(z, depth+1);
+    }
+}
+
 void Parser::printNodes() {
 
-    queue<int> q;
-    q.push(0);
-
-    while(q.size()) {
-        int cur = q.front();
-        q.pop();
-        cout << cur << ' ' << nodes[cur].type << ' ' << nodes[cur].name << '\n';
-        cout << "children: ";
-        for(int z : nodes[cur].children) {
-            cout << z << ' ';
-            q.push(z);
-        }
-        cout << '\n';
-    }
+    dfs(0, 0);
 
 }
 
@@ -44,7 +48,7 @@ int Parser::createNode() {
 void Parser::parseProgram() {
     nodes.clear();
     int nodeIdx = createNode();
-    nodes[nodeIdx].name = "PROGRAM";
+    nodes[nodeIdx].type = "PROGRAM";
 
     while (!curTokenIs(TokenType::EOF_TOKEN)) {
         int stmt = parseStatement();
@@ -62,13 +66,13 @@ int Parser::parseFunction() {
     bool valid = true;
     int nodeIdx = createNode();
 
+    nodes[nodeIdx].type = "FUNCTION";
+
     valid &= readTokenType();
     valid &= readToken(TokenType::IDENT);
     if(valid) {
-        int childIdx = createNode();
-        nodes[nodeIdx].children.push_back(childIdx);
-        nodes[childIdx].type = TokenTypeToString(tokens[idx-2].type);
-        nodes[childIdx].name = tokens[idx-1].literal;
+        nodes[nodeIdx].varType = TokenTypeToString(tokens[idx-2].type);
+        nodes[nodeIdx].name = tokens[idx-1].literal;
     }
     valid &= readToken(TokenType::LPAREN);
     int ret = parseArguments();
@@ -122,25 +126,12 @@ Token Parser::curToken() {
     return tokens[idx];
 }
 
-/**
- * Checks if the current token matches the specified token type.
- *
- * @param t The token type to compare with the current token.
- * @return true if the current token's type is equal to the specified type, false otherwise.
- */
 bool Parser::curTokenIs(TokenType t) {
     if(idx >= (int)tokens.size()) idx = tokens.size()-1;
 
     return tokens[idx].type == t;
 }
 
-/**
- * Advances the parser to the next token if the current token matches the specified token type.
- *
- * @param t The token type to compare with the current token.
- * @return true if the current token's type is equal to the specified type and the parser advanced,
- *         false otherwise.
- */
 bool Parser::readToken(TokenType t) {
     if(idx >= (int)tokens.size()) idx = tokens.size()-1;
     if(tokens[idx].type == t) {
@@ -148,37 +139,6 @@ bool Parser::readToken(TokenType t) {
         return true;
     }
     return false;
-}
-
-
-bool Parser::peekTokenIs(TokenType t){
-    if (idx + 1 >= (int)tokens.size()) return false;
-    return tokens[idx + 1].type == t;
-}
-
-/**
- * Ensures the next token matches the specified token type.
- *
- * @param t The token type to compare with the next token.
- * @return true if the next token's type is equal to the specified type and advances the parser, false otherwise.
- */
-bool Parser::expectPeek(TokenType t) {
-    if (peekTokenIs(t)) {
-        nextToken();
-        return true;
-    } else {
-        peekError(t);
-        return false;
-    }
-}
-
-/**
- * Records an error message when the next token does not match the expected token type.
- */
-void Parser::peekError(TokenType t) {
-    std::string msg = "Unexpected Token Error: Expected " + TokenTypeToString(t) 
-                      + ", got " + TokenTypeToString(tokens[idx + 1].type) + " instead";
-    errors.push_back(msg);
 }
 
 bool Parser::readTokenType() {
@@ -223,6 +183,15 @@ bool Parser::isType(TokenType t) const {
            t == TokenType::BOOL || t == TokenType::VARCHAR || t == TokenType::VI || t == TokenType::VOID;
 }
 
+bool Parser::isAssignmentStatement()  {
+    return curTokenIs(TokenType::IDENT) && tokens[idx+1].type == TokenType::ASSIGN;
+}
+
+bool Parser::isExpressionStatement() {
+    // For simplicity, treat any expression starting with an identifier or literal as an expression statement
+    return curTokenIs(TokenType::IDENT) || curTokenIs(TokenType::INT_LITERAL) || curTokenIs(TokenType::FLOAT_LITERAL) ||
+           curTokenIs(TokenType::STRING_LITERAL) || curTokenIs(TokenType::CHAR_LITERAL) || curTokenIs(TokenType::BOOLEAN_LITERAL);
+}
 
 int Parser::parseBlock() {
     int nodeIdx = createNode();
@@ -231,6 +200,7 @@ int Parser::parseBlock() {
     while (!curTokenIs(TokenType::RBRACE) && !curTokenIs(TokenType::EOF_TOKEN)) {
         int stmt = parseStatement();
         if (stmt != -1) nodes[nodeIdx].children.push_back(stmt);
+        else return -1;
     }
 
     return nodeIdx;
@@ -245,21 +215,24 @@ int Parser::parseStatement() {
     } 
     else if (isAssignmentStatement()) {
         return parseAssignmentStatement();
-    } else if (curTokenIs(TokenType::RETURN)) {
+    }
+     else if (curTokenIs(TokenType::RETURN)) {
         return parseReturnStatement();
-    } else if (curTokenIs(TokenType::FOR)) {
+    }
+    else if (curTokenIs(TokenType::FOR)) {
         return parseForLoop();
     } else if (curTokenIs(TokenType::WHILE)) {
         return parseWhileLoop();
-    } else if (curTokenIs(TokenType::IF)) {
+    }
+     else if (curTokenIs(TokenType::IF)) {
         return parseIfStatement();
-    } else if (curTokenIs(TokenType::LBRACE)) {
+    } 
+    else if (curTokenIs(TokenType::LBRACE)) {
         return parseBlock();
     } else if (isExpressionStatement()) {
         return parseExpressionStatement();
     } 
     else {
-        // Handle error or skip token
         nextToken();
         return -1;
     }
@@ -300,9 +273,9 @@ bool Parser::isAssignmentStatement() {
 
 int Parser::parseVariableDeclaration() {
     int nodeIdx = createNode();
-    nodes[nodeIdx].name = "DECLARATION";
+    nodes[nodeIdx].type = "DECLARATION";
     // Set the type
-    nodes[nodeIdx].type = curToken().literal;
+    nodes[nodeIdx].varType = curToken().literal;
     nextToken();
 
     // Expect an identifier
@@ -368,7 +341,7 @@ int Parser::parseReturnStatement() {
     nodes[nodeIdx].children.push_back(ret);
 
     // Expect a semicolon
-    if (!expectPeek(TokenType::SEMICOLON)) {
+    if (!readToken(TokenType::SEMICOLON)) {
         return -1;
     }
 
@@ -376,31 +349,158 @@ int Parser::parseReturnStatement() {
 }
 
 
+int Parser::parseIfStatement() {
+    int nodeIdx = createNode();
+    nodes[nodeIdx].type = "IF_STATEMENT";
 
-int Parser::parseIfStatement(){
-    return -1;
-}
-
-
-int Parser::parseWhileLoop(){
-    return -1;
-}
-
-int Parser::parseForLoop(){
-    return -1;
-}
-int Parser::parseExpressionStatement() {
-    int exprIdx = parseExpression();
-    if (exprIdx == -1) {
+    if (!readToken(TokenType::IF)) {
+        return -1;
+    }
+    if (!readToken(TokenType::LPAREN)) {
         return -1;
     }
 
-    // Expect a semicolon
-    if (!readToken(TokenType::SEMICOLON)) {
+    int cond = parseExpression();
+
+    if(cond == -1) return cond;
+    else nodes[nodeIdx].children.push_back(cond);
+
+
+    if (!readToken(TokenType::RPAREN)) {
         return -1;
     }
 
-    return exprIdx;
+    if (!readToken(TokenType::LBRACE)) {
+        return -1;
+    }
+
+    int block = parseBlock();
+    if(block == -1) return cond;
+    else nodes[nodeIdx].children.push_back(block);
+
+    if (!readToken(TokenType::RBRACE)) {
+        return -1;
+    }
+
+    if (readToken(TokenType::ELSE)) {
+        if (!readToken(TokenType::LBRACE)) {
+            return -1;
+        }
+        block = parseBlock();
+        if(block == -1) return -1;
+        nodes[nodeIdx].children.push_back(block);
+        if (!readToken(TokenType::RBRACE)) {
+            return -1;
+        }
+    }
+
+    return nodeIdx;
+}
+
+int Parser::parseWhileLoop() {
+    int nodeIdx = createNode();
+    nodes[nodeIdx].type = "WHILE";
+
+    if (!readToken(TokenType::WHILE)) {
+        return -1;
+    }
+    if (!readToken(TokenType::LPAREN)) {
+        return -1;
+    }
+
+    int cond = parseExpression();
+
+    if(cond == -1) return cond;
+    else nodes[nodeIdx].children.push_back(cond);
+
+    if (!readToken(TokenType::RPAREN)) {
+        return -1;
+    }
+
+    if (!readToken(TokenType::LBRACE)) {
+        return -1;
+    }
+    
+    cond = parseBlock();
+    if(cond == -1) return cond;
+    else nodes[nodeIdx].children.push_back(cond);
+
+    if (!readToken(TokenType::RBRACE)) {
+        return -1;
+    }
+    return nodeIdx;
+}
+
+int Parser::parseForLoop() {
+    // Simplified for loop parsing
+    int nodeIdx = createNode();
+    nodes[nodeIdx].type = "FOR";
+
+    if (!readToken(TokenType::FOR)) {
+        return -1;
+    }
+    if (!readToken(TokenType::LPAREN)) {
+        return -1;
+    }
+
+    // Parse initializer
+    if (isType(curToken().type) && tokens[idx+1].type == TokenType::IDENT) {
+        int ret = parseVariableDeclaration();
+        if(ret == -1) return ret;
+        nodes[nodeIdx].children.push_back(ret);
+    } else if (curTokenIs(TokenType::SEMICOLON)) {
+        readToken(TokenType::SEMICOLON);
+        int empty = createNode();
+        nodes[empty].type = "EMPTY";
+        nodes[nodeIdx].children.push_back(empty);
+    } else {
+        int ret = parseExpressionStatement();
+        if(ret == -1) return ret;
+        nodes[nodeIdx].children.push_back(ret);
+    }
+
+    // Parse condition
+    if (!curTokenIs(TokenType::SEMICOLON)) {
+        int ret = parseExpressionStatement();
+        if(ret == -1) return ret;
+        nodes[nodeIdx].children.push_back(ret);
+    }
+    else {
+        readToken(TokenType::SEMICOLON);
+        int empty = createNode();
+        nodes[empty].type = "EMPTY";
+        nodes[nodeIdx].children.push_back(empty);
+    }
+
+    // Parse update
+    if (!curTokenIs(TokenType::RPAREN)) {  
+        int ret = parseExpression();
+        if(ret == -1) return ret;
+        nodes[nodeIdx].children.push_back(ret);
+    }
+    else {
+        int empty = createNode();
+        nodes[empty].type = "EMPTY";
+        nodes[nodeIdx].children.push_back(empty);
+    }
+
+    if (!readToken(TokenType::RPAREN)) {
+        return -1;
+    }
+
+    if (!readToken(TokenType::LBRACE)) {
+        return -1;
+    }
+    
+    int cond = parseBlock();
+    if(cond == -1) return cond;
+    else nodes[nodeIdx].children.push_back(cond);
+
+    if (!readToken(TokenType::RBRACE)) {
+        return -1;
+    }
+
+    return nodeIdx;
 }
 
 int Parser::parseExpression(int precedence) {
