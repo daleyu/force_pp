@@ -158,24 +158,24 @@ bool Parser::isTokenType() {
     return false;
 }
 
-// bool Parser::peekTokenIs(TokenType t) const {
-//     return peekToken.type == t;
-// }
-
-// bool Parser::expectPeek(TokenType t) {
-//     if (peekTokenIs(t)) {
-//         nextToken();
-//         return true;
-//     } else {
-//         peekError(t);
-//         return false;
-//     }
-// }
-
-// void Parser::peekError(TokenType t) {
-//     std::string msg = "expected next token to be " + TokenTypeToString(t) + ", got " + TokenTypeToString(peekToken.type) + " instead";
-//     errors.push_back(msg);
-// }
+bool Parser::peekTokenIs(TokenType t){
+    if (idx + 1 >= (int)tokens.size()) return false;
+    return tokens[idx + 1].type == t;
+}
+bool Parser::expectPeek(TokenType t) {
+    if (peekTokenIs(t)) {
+        nextToken();
+        return true;
+    } else {
+        peekError(t);
+        return false;
+    }
+}
+void Parser::peekError(TokenType t) {
+    std::string msg = "Unexpected Token Error: Expected " + TokenTypeToString(t) 
+                      + ", got " + TokenTypeToString(tokens[idx + 1].type) + " instead";
+    errors.push_back(msg);
+}
 
 // Helper methods
 bool Parser::isType(TokenType t) const {
@@ -238,12 +238,6 @@ int Parser::parseStatement() {
     }
 }
 
-bool Parser::isExpressionStatement(){
-    return curTokenIs(TokenType::IDENT) || curTokenIs(TokenType::INT_LITERAL) ||
-           curTokenIs(TokenType::FLOAT_LITERAL) || curTokenIs(TokenType::STRING_LITERAL) ||
-           curTokenIs(TokenType::CHAR_LITERAL) || curTokenIs(TokenType::BOOLEAN_LITERAL);
-}
-
 int Parser::getPrecedence(TokenType type) {
     auto it = precedences.find(type);
     if (it != precedences.end()) {
@@ -265,11 +259,6 @@ bool Parser::isBooleanOperator(TokenType type) {
 }
 
 // end of helper functions
-
-bool Parser::isAssignmentStatement() {
-    // Ensure current token is an identifier and the next token is an assignment operator
-    return curTokenIs(TokenType::IDENT) && peekTokenIs(TokenType::ASSIGN);
-}
 
 int Parser::parseVariableDeclaration() {
     int nodeIdx = createNode();
@@ -431,6 +420,21 @@ int Parser::parseWhileLoop() {
     return nodeIdx;
 }
 
+int Parser::parseExpressionStatement() {
+    int exprIdx = parseExpression();
+    if (exprIdx == -1) {
+        return -1;
+    }
+
+    // Expect a semicolon
+    if (!readToken(TokenType::SEMICOLON)) {
+        return -1;
+    }
+
+    return exprIdx;
+}
+
+
 int Parser::parseForLoop() {
     // Simplified for loop parsing
     int nodeIdx = createNode();
@@ -506,7 +510,7 @@ int Parser::parseForLoop() {
 int Parser::parseExpression(int precedence) {
     int nodeIdx = -1;
 
-    // Parse left-hand side (could be a primary expression)
+    // Parse left-hand side with current precedence
     if (curTokenIs(TokenType::IDENT)) {
         // FunctionCall or an Identifier at first check thingy
         int identIdx = createNode();
@@ -605,7 +609,6 @@ int Parser::parseExpression(int precedence) {
 
             nextToken(); // Move past the operator
 
-            // Parse the right-hand side expression
             int rightIdx = parseExpression(currentPrecedence);
             if (rightIdx == -1) {
                 return -1;

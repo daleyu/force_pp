@@ -13,7 +13,10 @@
 class Parser {
 public:
     Parser(std::vector<Token>);
-    std::vector<std::string> Errors() const;
+    std::vector<std::string> errors;
+    std::vector<std::string> Errors() const{
+        return errors;
+    }
     int createNode();
     int idx;
     std::vector<Token> tokens;
@@ -36,14 +39,14 @@ public:
 //     Token peekToken;
 //     std::vector<std::string> errors;
 
-//     // Token-related methods
-//     void peekError(TokenType t);
+    // Token-related methods
     void nextToken();
     bool curTokenIs(TokenType t);
-//     bool peekTokenIs(TokenType t) const;
-//     bool expectPeek(TokenType t);
+    bool peekTokenIs(TokenType t);
+    bool expectPeek(TokenType t);
+    void peekError(TokenType t);
 
-//     // Helper methods
+    // Helper methods
     bool isType(TokenType t) const;
     bool isExpressionStatement();
     bool isAssignmentStatement();
@@ -60,8 +63,8 @@ public:
     int parseIfStatement();
     int parseReturnStatement();
     int parseBlock();
-    int parseExpression(int precedence = 0);
 //     std::vector<std::unique_ptr<Expression> > parseExpressionList(TokenType end);
+    int parseExpression(int precedence = 0);
     
 
 //     // Prefix parsing functions
