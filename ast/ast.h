@@ -12,6 +12,7 @@
 class ASTNode {
 public:
     std::string type;
+    std::string varType;
     std::string name;
     std::vector<int> children;
 };

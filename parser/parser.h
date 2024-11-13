@@ -20,6 +20,7 @@ public:
     std::vector<ASTNode> nodes;
 
     void printNodes();
+    void dfs(int, int);
 
     void parseProgram();
     int parseFunction();
@@ -46,20 +47,20 @@ public:
     bool isType(TokenType t) const;
 //     int peekPrecedence() const;
 //     int curPrecedence() const;
-//     bool isAssignmentStatement() const;
-//     bool isExpressionStatement() const;
+    bool isAssignmentStatement();
+    bool isExpressionStatement();
 
 //     // Parsing methods
         int parseStatement();
         int parseVariableDeclaration();
-//     std::unique_ptr<Statement> parseAssignmentStatement();
-//     std::unique_ptr<Statement> parseExpressionStatement();
-//     std::unique_ptr<Statement> parseForLoop();
-//     std::unique_ptr<Statement> parseWhileLoop();
-//     std::unique_ptr<Statement> parseIfStatement();
-//     std::unique_ptr<Statement> parseReturnStatement();
+    int parseAssignmentStatement();
+    int parseExpressionStatement();
+    int parseForLoop();
+    int parseWhileLoop();
+    int parseIfStatement();
+    int parseReturnStatement();
         int parseBlock();
-//     std::unique_ptr<Expression> parseExpression(int precedence = 0);
+    int parseExpression(int precedence = 0);
 //     std::vector<std::unique_ptr<Expression> > parseExpressionList(TokenType end);
     
 

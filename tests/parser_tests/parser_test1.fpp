@@ -1,5 +1,13 @@
 int solve() {
-	int a;
-	int b;
-	int c;
+	
+	int a = d;
+	e;
+	while(c) {
+		int d;
+		for(int c = d; e; f) {
+			int h;
+		}
+	}
+	return e;
+
 }
