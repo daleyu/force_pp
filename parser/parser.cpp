@@ -235,6 +235,7 @@ int Parser::parseStatement() {
         return parseExpressionStatement();
     } 
     else {
+        errors.push_back("Unexpected token '" + curToken().literal + "' at position " + std::to_string(idx));
         nextToken();
         return -1;
     }
@@ -621,7 +622,6 @@ int Parser::parseExpression(int precedence) {
 
             nodeIdx = binNodeIdx;
         } else {
-            errors.push_back("expected binary operator, got " + TokenTypeToString(curToken().type) + " instead");
             break;
         }
     }
