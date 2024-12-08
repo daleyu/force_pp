@@ -24,7 +24,10 @@ void Parser::dfs(int cur, int depth) {
     if(depth) cout << "--";
     
     if(nodes[cur].type.size()) cout << nodes[cur].type << ' ';
+    else cout << "- ";
     if(nodes[cur].varType.size()) cout << nodes[cur].varType << ' ';
+    else cout << "- ";
+
     cout <<  nodes[cur].name << '\n';
     for(int z : nodes[cur].children) {
         dfs(z, depth+1);
@@ -71,7 +74,7 @@ int Parser::parseFunction() {
     valid &= readTokenType();
     valid &= readToken(TokenType::IDENT);
     if(valid) {
-        nodes[nodeIdx].varType = TokenTypeToString(tokens[idx-2].type);
+        nodes[nodeIdx].varType = tokens[idx-2].literal;
         nodes[nodeIdx].name = tokens[idx-1].literal;
     }
     valid &= readToken(TokenType::LPAREN);
@@ -109,7 +112,8 @@ int Parser::parseArguments() {
         if(!valid) return -1;
         int childIdx = createNode();
         nodes[nodeIdx].children.push_back(childIdx);
-        nodes[childIdx].type = TokenTypeToString(tokens[idx-2].type);
+        nodes[childIdx].type = "DECLARATION";
+        nodes[childIdx].varType = tokens[idx-2].literal;
         nodes[childIdx].name = tokens[idx-1].literal;        
         valid &= readToken(TokenType::COMMA);
         if(!valid) break;
@@ -300,7 +304,7 @@ int Parser::parseAssignmentStatement() {
     if (!curTokenIs(TokenType::IDENT)) {
         return -1;
     }
-    nodes[nodeIdx].type = "Identifier";
+    nodes[nodeIdx].type = "IDENTIFIER";
     nodes[nodeIdx].name = curToken().literal;  // the identifier name
     nextToken();  // Move past the identifier
 
@@ -326,7 +330,7 @@ int Parser::parseAssignmentStatement() {
 
 int Parser::parseReturnStatement() {
     int nodeIdx = createNode();
-    nodes[nodeIdx].name = "RETURN";
+    nodes[nodeIdx].type = "RETURN";
 
     nextToken();
     int ret = parseExpression();
@@ -586,7 +590,7 @@ int Parser::parseExpression(int precedence) {
         if (curTokenIs(TokenType::LPAREN)) {
             // FunctionCall
             nodeIdx = createNode();
-            nodes[nodeIdx].name = "FUNCTION CALL";
+            nodes[nodeIdx].type = "FUNCTION CALL";
             nodes[nodeIdx].children.push_back(identIdx);
 
             if (!readToken(TokenType::LPAREN)) {
@@ -640,8 +644,8 @@ int Parser::parseExpression(int precedence) {
 
     } else if (curTokenIs(TokenType::MINUS) || curTokenIs(TokenType::BANG)) {
         int unaryNodeIdx = createNode();
-        nodes[unaryNodeIdx].name = "UNARY OPERATOR";
-        nodes[unaryNodeIdx].type = curToken().literal;
+        nodes[unaryNodeIdx].type = "UNARY OPERATOR";
+        nodes[unaryNodeIdx].name = curToken().literal;
 
         nextToken(); // Move past the unary operator
 
@@ -673,8 +677,8 @@ int Parser::parseExpression(int precedence) {
         TokenType opType = curToken().type;
         if (isBinaryOperator(opType) || isBooleanOperator(opType)) {
             int binNodeIdx = createNode();
-            nodes[binNodeIdx].name = "BINARY OPERATOR";
-            nodes[binNodeIdx].type = curToken().literal;
+            nodes[binNodeIdx].type = "BINARY OPERATOR";
+            nodes[binNodeIdx].name = curToken().literal;
 
             nextToken(); // Move past the operator
 

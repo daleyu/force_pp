@@ -7,6 +7,9 @@
 #include "token/token.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
+#include "ast/ast.h"
+#include "processor/processor.h"
+
 
 int main(int argc, char* argv[]) {
 
@@ -49,7 +52,11 @@ int main(int argc, char* argv[]) {
         std::cout << error << '\n';
     }
 
+    std::vector<ASTNode> nodes = parser.nodes;
+    std::string output = "test.cpp";
 
+    Processor processor(nodes, output);
+    processor.process();
 
     return 0;
 }

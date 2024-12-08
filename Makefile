@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Werror -std=c++17
+CXXFLAGS = -Wall  -std=c++17
 
 # Object files
 LEXER_OBJ = lexer.o
@@ -8,6 +8,7 @@ LEXER_TESTS_OBJ = lexer_tests.o
 PARSER_TESTS_OBJ = parser_tests.o
 PARSER_OBJ = parser.o
 AST_OBJ = ast/ast.o
+PROCESSOR_OBJ = processor.o
 
 MAIN_EXECUTABLE = main
 LEXER_TEST_EXECUTABLE = lexer_test
@@ -41,13 +42,17 @@ lexer_test: $(TOKEN_OBJ) $(LEXER_OBJ) $(LEXER_TESTS_OBJ)
 parser_test: $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ) $(PARSER_TESTS_OBJ)
 	$(CXX) $(CXXFLAGS) $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ) $(PARSER_TESTS_OBJ) -o $(PARSER_TEST_EXECUTABLE)
 
+# Compile processor.o
+$(PROCESSOR_OBJ): processor/processor.cpp processor/processor.h
+	$(CXX) $(CXXFLAGS) -c processor/processor.cpp -o $(PROCESSOR_OBJ)
+	
 # Compile main.o
-main.o: main.cpp lexer/lexer.h parser/parser.h token/token.h ast/ast.h
+main.o: main.cpp lexer/lexer.h parser/parser.h token/token.h ast/ast.h processor/processor.h
 	$(CXX) $(CXXFLAGS) -c main.cpp -o main.o
 
 # Build main executable
-main: main.o $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ)
-	$(CXX) $(CXXFLAGS) main.o $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ) -o $(MAIN_EXECUTABLE)
+main: main.o $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ) $(PROCESSOR_OBJ)
+	$(CXX) $(CXXFLAGS) main.o $(TOKEN_OBJ) $(LEXER_OBJ) $(PARSER_OBJ) $(AST_OBJ) $(PROCESSOR_OBJ) -o $(MAIN_EXECUTABLE)
 
 tests: lexer_test parser_test
 
