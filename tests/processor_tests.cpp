@@ -11,10 +11,10 @@
 #include "../parser/parser.h"
 #include "../lexer/lexer.h"
 #include "../token/token.h"
-#include "../ast/ast.h"
 #include "../processor/processor.h"
 
 // Test function declarations
+void run_processor_test(const std::string& input_file);
 void test_program1();
 void test_program2();
 void test_program3();
@@ -34,71 +34,88 @@ static std::string exec(const char* cmd) {
     }
     return result;
 }
-
-int main() {
-    // Here you could run multiple tests by looping over test input files if you have more.
-    // For demonstration, we do one test: "processor_tests1.fpp"
-    
-    std::string test_input = "processor_tests1.fpp";
-    std::ifstream file(test_input);
+std::string readFile(const std::string& filename) {
+    std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "Error opening file " << test_input << std::endl;
-        return 1;
+        std::cerr << "Error opening " << filename << std::endl;
+        assert(false);
     }
-
-    std::string program((std::istreambuf_iterator<char>(file)),
+    std::string content((std::istreambuf_iterator<char>(file)),
                          std::istreambuf_iterator<char>());
     file.close();
+    return content;
+}
 
-    // Initialize Lexer with the input program
+
+void run_processor_test(const std::string& input_file) {
+    std::cout << "\nRunning test: " << input_file << std::endl;
+    
+    std::string program = readFile(input_file);
+    
     Lexer lexer(program);
-
-    // Tokenize the input
     std::vector<Token> tokens;
     Token tok = lexer.NextToken();
     while (tok.type != TokenType::EOF_TOKEN) {
         tokens.push_back(tok);
         tok = lexer.NextToken();
     }
-    tokens.push_back(tok); // Add the EOF token at the end
+    tokens.push_back(tok);
 
-    // Parse the tokens into an AST
     Parser parser(tokens);
     parser.parseProgram();
-
-    // Check for parse errors
     std::vector<std::string> errors = parser.Errors();
     for (const std::string &error : errors) {
         std::cerr << "Parse error: " << error << '\n';
     }
-    assert(errors.empty()); // We expect no parse errors
+    assert(errors.empty());
 
-    // Get the AST nodes
-    std::vector<ASTNode> nodes = parser.nodes;
-
-    // Process the AST to generate a C++ file (test.cpp)
-    std::string output_filename = "test.cpp";
-    Processor processor(nodes, output_filename);
+    std::string output_filename = input_file.substr(0, input_file.find_last_of('.')) + ".cpp";
+    Processor processor(parser.nodes, output_filename);
     processor.process();
 
-    // Compile the generated code
     int ret = system("g++ test.cpp -o test_exe");
     if (ret != 0) {
-        std::cerr << "Compilation of test.cpp failed!\n";
-        return 1;
+        std::cerr << "Compilation of " << output_filename << " failed!\n";
+        return;
     }
 
-    // Run the compiled executable and capture its output
     std::string result = exec("./test_exe");
-
-    // Print the output from the generated program
-    std::cout << "Test program output:\n" << result << "\n";
-
+    std::cout << "Test output:\n" << result;
     // Here you can define what you expect the output to be and assert it.
     // For example:
     // std::string expected_output = "Hello, world!\n";
     // assert(result == expected_output);
-
     std::cout << "Test completed successfully.\n";
+}
+void test_program1() {
+    run_processor_test("tests/processor_tests/processor_test1.fpp");
+}
+
+void test_program2() {
+    run_processor_test("tests/processor_tests/processor_test2.fpp");
+}
+
+void test_program3() {
+    run_processor_test("tests/processor_tests/processor_test3.fpp");
+}
+
+void test_program4() {
+    run_processor_test("tests/processor_tests/processor_test4.fpp");
+}
+
+void test_program5() {
+    run_processor_test("tests/processor_tests/processor_test5.fpp");
+}
+
+int main() {
+    std::cout << "Running Processor tests..." << std::endl;
+
+    test_program1();
+    test_program2();
+    test_program3();
+    test_program4();
+    test_program5();
+
+    std::cout << "All Processor tests pased!" << std::endl;
     return 0;
 }
