@@ -10,6 +10,10 @@ if [ $? -eq 0 ]; then
     echo "Lexer Tests Completed. Running tests..."
     ./parser_test
     echo "----------------------------------------"
+    echo "Lexer Tests Completed. Running tests..."
+    ./processor_test
+    echo "----------------------------------------"
+    
 else
     echo "Compilation failed."
 fi
