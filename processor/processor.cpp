@@ -1,6 +1,6 @@
 #include "processor.h"
 
-// // Constructor
+// Constructor
 Processor::Processor(std::vector<ASTNode> a, std::string b) 
 {
 
