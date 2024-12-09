@@ -37,3 +37,5 @@ main
 run_tests
 lexer_test
 parser_test
+processor_test
+test_exe

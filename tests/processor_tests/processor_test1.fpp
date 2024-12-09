@@ -4,6 +4,6 @@ void solve(int a) {
 	for(int i = a; i < n; i++) {
         result++;
 	}	
+    
     return result;
 }
-solve(10);

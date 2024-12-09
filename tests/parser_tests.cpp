@@ -66,30 +66,35 @@ void test_program1() {
     std::string input = readFile("tests/parser_tests/parser_test1.fpp");
     runParserTest(input);
     std::cout << "test_program1 passed" << std::endl;
+    std::cout << "--------------" << std::endl;
 }
 
 void test_program2() {
     std::string input = readFile("tests/parser_tests/parser_test2.fpp");
     runParserTest(input);
     std::cout << "test_program2 passed" << std::endl;
+    std::cout << "--------------" << std::endl;
 }
 
 void test_program3() {
     std::string input = readFile("tests/parser_tests/parser_test3.fpp");
     runParserTest(input);
     std::cout << "test_program3 passed" << std::endl;
+    std::cout << "--------------" << std::endl;
 }
 
 void test_program4() {
     std::string input = readFile("tests/parser_tests/parser_test4.fpp");
     runParserTest(input);
     std::cout << "test_program4 passed" << std::endl;
+    std::cout << "--------------" << std::endl;
 }
 
 void test_program5() {
     std::string input = readFile("tests/parser_tests/parser_test5.fpp");
     runParserTest(input);
     std::cout << "test_program5 passed" << std::endl;
+    std::cout << "--------------" << std::endl;
 }
 
 // Main function to run all tests

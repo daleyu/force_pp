@@ -81,30 +81,32 @@ void run_processor_test(const std::string& input_file) {
 
     std::string result = exec("./test_exe");
     std::cout << "Test output:\n" << result;
-    // Here you can define what you expect the output to be and assert it.
-    // For example:
     // std::string expected_output = "Hello, world!\n";
     // assert(result == expected_output);
-    std::cout << "Test completed successfully.\n";
 }
 void test_program1() {
     run_processor_test("tests/processor_tests/processor_test1.fpp");
+    std::cout << "Processor Test 1 completed successfully.\n";
 }
 
 void test_program2() {
     run_processor_test("tests/processor_tests/processor_test2.fpp");
+    std::cout << "Processor Test 2 completed successfully.\n";
 }
 
 void test_program3() {
     run_processor_test("tests/processor_tests/processor_test3.fpp");
+    std::cout << "Processor Test 3 completed successfully.\n";
 }
 
 void test_program4() {
     run_processor_test("tests/processor_tests/processor_test4.fpp");
+    std::cout << "Processor Test 4 completed successfully.\n";
 }
 
 void test_program5() {
     run_processor_test("tests/processor_tests/processor_test5.fpp");
+    std::cout << "Processor Test 5 completed successfully.\n";
 }
 
 int main() {
