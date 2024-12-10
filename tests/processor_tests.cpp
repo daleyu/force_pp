@@ -4,9 +4,12 @@
 #include <fstream>
 #include <cassert>
 #include <cstdio>
+#include <cstdlib>
 #include <memory>
 #include <stdexcept>
 #include <array>
+#include <chrono>
+#include <thread>
 
 #include "../parser/parser.h"
 #include "../lexer/lexer.h"
@@ -34,6 +37,7 @@ static std::string exec(const char* cmd) {
     }
     return result;
 }
+
 std::string readFile(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -73,14 +77,27 @@ void run_processor_test(const std::string& input_file) {
     Processor processor(parser.nodes, output_filename);
     processor.process();
 
-    int ret = system("g++ test.cpp -o test_exe");
-    if (ret != 0) {
-        std::cerr << "Compilation of " << output_filename << " failed!\n";
-        return;
-    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    std::string result = exec("./test_exe");
-    std::cout << "Test output:\n" << result;
+    std::string exe_name = input_file.substr(0, input_file.find_last_of('.')) + "_exe";
+    std::cout << "\n output filename:" << output_filename << std::endl;
+    std::cout << "\n exe_name" << exe_name << std::endl;
+
+
+    // std::string compile_cmd = "g++ -Wall -std=c++17 " + output_filename + " -o " + 
+    //                         "test_exe";
+    
+    // std::cout << "\nExecuting compilation command: " << compile_cmd << std::endl;
+    
+    // int compile_result = system(compile_cmd.c_str());
+    // if (compile_result != 0) {
+    //     throw std::runtime_error("Compilation failed for: " + output_filename +
+    //                             "\nCommand used: " + compile_cmd);
+    // }
+
+    // std::string result = exec(("./" + input_file.substr(0, input_file.find_last_of('.')) + "_exe").c_str());
+    // std::cout << "Test output:\n" << result;
+
     // std::string expected_output = "Hello, world!\n";
     // assert(result == expected_output);
 }

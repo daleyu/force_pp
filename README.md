@@ -79,7 +79,7 @@ ExpressionStatement ::= Expression
 
 ForLoop ::= "for" "(" ForInit ";" [ Condition ] ";" [ ForUpdate ] ")" Statement
           | "for" "(" Type Identifier ":" Expression ")" Statement
-          | "forn" "(" <DECIMAL_LITERAL> ":" <DECIMAL_LITERAL> ")" Statement
+          | "forn" "("Identifier "," <DECIMAL_LITERAL> ")" Statement
 
 ForInit ::= VariableDeclaration
           | AssignmentStatement

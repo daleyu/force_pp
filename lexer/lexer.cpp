@@ -17,6 +17,7 @@ std::unordered_map<std::string, TokenType> keywords = {
     {"for", TokenType::FOR},
     {"forn", TokenType::FOR},
     {"while", TokenType::WHILE},
+    {"cout", TokenType::COUT},
     {"if", TokenType::IF},
     {"else", TokenType::ELSE},
     {"return", TokenType::RETURN},
@@ -114,10 +115,24 @@ Token Lexer::NextToken() {
             }
             break;
         case '+':
-            tok = NewToken(TokenType::PLUS, std::string(1, ch));
+            if (PeekChar() == '+') {
+                char currentCh = ch;
+                ReadChar();
+                std::string literal = std::string(1, currentCh) + ch;
+                tok = NewToken(TokenType::PLUSPLUS, literal);
+            } else {
+                tok = NewToken(TokenType::PLUS, std::string(1, ch));
+            }
             break;
         case '-':
-            tok = NewToken(TokenType::MINUS, std::string(1, ch));
+            if (PeekChar() == '-') {
+                char currentCh = ch;
+                ReadChar();
+                std::string literal = std::string(1, currentCh) + ch;
+                tok = NewToken(TokenType::MINUSMINUS, literal);
+            } else {
+                tok = NewToken(TokenType::MINUS, std::string(1, ch));
+            }
             break;
         case '!':
             if (PeekChar() == '=') {

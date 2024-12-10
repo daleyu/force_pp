@@ -235,6 +235,9 @@ int Parser::parseStatement() {
      else if (curTokenIs(TokenType::IF)) {
         return parseIfStatement();
     } 
+    else if (curTokenIs(TokenType::COUT)){
+        return parseCout();
+    }
     else if (curTokenIs(TokenType::LBRACE)) {
         return parseBlock();
     } else if (isExpressionStatement()) {
@@ -571,6 +574,50 @@ int Parser::parseFornLoop() {
     return nodeIdx;
 }
 
+int Parser::parseCout() {
+    int nodeIdx = createNode();
+    nodes[nodeIdx].type = "COUT";
+
+    // We've already matched COUT in parseStatement()
+    if (!readToken(TokenType::COUT)) {
+        return -1;
+    }
+
+    // Expect '(' after cout
+    if (!readToken(TokenType::LPAREN)) {
+        return -1;
+    }
+
+    // Parse exactly one argument
+    int argIdx = parseExpression();
+    if (argIdx == -1) {
+        return -1; 
+    }
+
+    // Verify that the argument is either an IDENTIFIER or a STRING_LITERAL node
+    std::string argType = nodes[argIdx].type;
+    if (argType != "IDENTIFIER" && argType != "STRING_LITERAL") {
+        std::cerr << "ERROR: cout can only print a variable or a string literal\n";
+        return -1;
+    }
+
+    // Expect closing parenthesis
+    if (!readToken(TokenType::RPAREN)) {
+        return -1;
+    }
+
+    // Expect semicolon
+    if (!readToken(TokenType::SEMICOLON)) {
+        return -1;
+    }
+
+    // Add the single argument as a child of COUT node
+    nodes[nodeIdx].children.push_back(argIdx);
+
+    return nodeIdx;
+}
+
+
 int Parser::parseExpression(int precedence) {
     int nodeIdx = -1;
 
@@ -623,6 +670,26 @@ int Parser::parseExpression(int precedence) {
             nodeIdx = identIdx;
         }
 
+        // Handle postfix operators 
+        if (curTokenIs(TokenType::PLUSPLUS)) {
+            int postfixIdx = createNode();
+            nodes[postfixIdx].type = "POSTFIX OPERATOR";
+            nodes[postfixIdx].name = "++";
+            nodes[postfixIdx].children.push_back(nodeIdx); // The operand is the identifier node
+            nextToken(); // consume ++
+            nodeIdx = postfixIdx;
+        }
+
+        if (curTokenIs(TokenType::MINUSMINUS)){
+            int postfixIdx = createNode();
+            nodes[postfixIdx].type = "POSTFIX OPERATOR";
+            nodes[postfixIdx].name = "--";
+            nodes[postfixIdx].children.push_back(nodeIdx); // The operand is the identifier node
+            nextToken(); // consume --
+            nodeIdx = postfixIdx;
+        }
+
+
     } else if (curTokenIs(TokenType::INT_LITERAL) || curTokenIs(TokenType::FLOAT_LITERAL) ||
                curTokenIs(TokenType::STRING_LITERAL) || curTokenIs(TokenType::CHAR_LITERAL) ||
                curTokenIs(TokenType::BOOLEAN_LITERAL)) {
@@ -643,6 +710,7 @@ int Parser::parseExpression(int precedence) {
         }
 
     } else if (curTokenIs(TokenType::MINUS) || curTokenIs(TokenType::BANG)) {
+        // Prefix unary operator
         int unaryNodeIdx = createNode();
         nodes[unaryNodeIdx].type = "UNARY OPERATOR";
         nodes[unaryNodeIdx].name = curToken().literal;

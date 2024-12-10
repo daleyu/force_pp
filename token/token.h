@@ -20,7 +20,9 @@ enum class TokenType {
     // Operators
     ASSIGN,
     PLUS,
+    PLUSPLUS,
     MINUS,
+    MINUSMINUS,
     BANG,
     ASTERISK,
     SLASH,
@@ -61,6 +63,7 @@ enum class TokenType {
     VI,
     FOR,
     WHILE,
+    COUT,
     FORN,
     VOID,
 };

@@ -12,5 +12,6 @@ result = (x + y);
 int main() {
 int t = 1;
 if (multiTest) cin >> t;
-for (int ii = 0; ii < t; ii++) {solve(ii);}
+for (int ii = 0; ii < t; ii++) {solve(ii);} 
+ return 0;
 }

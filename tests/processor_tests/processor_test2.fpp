@@ -17,5 +17,4 @@ void solve(int i) {
     bool flag = x == y && x != z || !flag;
 
     result = func1(x, y) * func2(z);
-    print(result);
 }
