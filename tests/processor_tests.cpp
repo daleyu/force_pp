@@ -67,9 +67,13 @@ void run_processor_test(const std::string& input_file) {
 
     Parser parser(tokens);
     parser.parseProgram();
+
     std::vector<std::string> errors = parser.Errors();
     for (const std::string &error : errors) {
         std::cerr << "Parse error: " << error << '\n';
+    }
+    if (errors.size() > 0) {
+        throw std::runtime_error("Parser errors encountered.");
     }
     assert(errors.empty());
 
@@ -80,8 +84,6 @@ void run_processor_test(const std::string& input_file) {
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     std::string exe_name = input_file.substr(0, input_file.find_last_of('.')) + "_exe";
-    std::cout << "\n output filename:" << output_filename << std::endl;
-    std::cout << "\n exe_name" << exe_name << std::endl;
 
 
     // std::string compile_cmd = "g++ -Wall -std=c++17 " + output_filename + " -o " + 

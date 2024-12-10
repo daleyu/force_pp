@@ -9,7 +9,9 @@ ll d, l, r, k, n, m, p, q, u, v, w, x, y, z;
 int solve(int a){
 int n = 10;
 int result = 0;
-for(;
+for(int i = 0; i < 10; i++){
+result = (result + i);
+};
 return result;
 }
 

@@ -115,8 +115,13 @@ int Parser::parseArguments() {
         nodes[childIdx].type = "DECLARATION";
         nodes[childIdx].varType = tokens[idx-2].literal;
         nodes[childIdx].name = tokens[idx-1].literal;        
-        valid &= readToken(TokenType::COMMA);
-        if(!valid) break;
+        valid &= curTokenIs(TokenType::COMMA);
+        if (valid) {
+            nextToken();
+        }
+        else {
+            break;
+        }
     }
 
 
@@ -144,6 +149,9 @@ bool Parser::readToken(TokenType t) {
         idx++;
         return true;
     }
+    std::string msg = "Unexpected Token Error: Expected " + TokenTypeToString(t) 
+                      + ", got " + TokenTypeToString(tokens[idx].type) + " instead at index " + to_string(idx);
+    errors.push_back(msg);
     return false;
 }
 
@@ -325,6 +333,8 @@ int Parser::parseAssignmentStatement() {
 
     // Expect a semicolon
     if (!readToken(TokenType::SEMICOLON)) {
+        std::cout << "Expected semicolon after assignment statement at index " << idx << std::endl;
+        errors.push_back("Expected semicolon after assignment statement at index " + to_string(idx));
         return -1;
     }
 
@@ -438,6 +448,7 @@ int Parser::parseExpressionStatement() {
     }
 
     // Expect a semicolon
+    
     if (!readToken(TokenType::SEMICOLON)) {
         return -1;
     }
@@ -517,9 +528,7 @@ int Parser::parseForLoop() {
 
     return nodeIdx;
 }
-
 int Parser::parseFornLoop() {
-    // Simplified for loop parsing
     int nodeIdx = createNode();
     nodes[nodeIdx].type = "FORN";
 
@@ -530,30 +539,29 @@ int Parser::parseFornLoop() {
         return -1;
     }
 
-    // Parse initializer
-    if(!readToken(TokenType::IDENT)) {
+    if (!readToken(TokenType::IDENT)) {
         return -1;
     }
 
-    string label = tokens[idx-1].literal;
-    int childIdx = createNode();
-    nodes[childIdx].type = "DECLARATION";
-    nodes[childIdx].varType = "int";
-    nodes[childIdx].name = curToken().literal;
+    std::string varName = tokens[idx-1].literal;
 
-    if(!readToken(TokenType::COMMA)) {
+    int varNode = createNode();
+    nodes[varNode].type = "DECLARATION";
+    nodes[varNode].varType = "int";
+    nodes[varNode].name = varName;
+
+    nodes[nodeIdx].children.push_back(varNode);
+
+    if (!readToken(TokenType::COMMA)) {
         return -1;
     }
 
-    // Parse update
-    if (!curTokenIs(TokenType::RPAREN)) {  
-        int ret = parseExpression();
-        if(ret == -1) return ret;
-        nodes[nodeIdx].children.push_back(ret);
+    int upperBound = parseExpression();
+    if (upperBound == -1) {
+        return -1;
     }
-    else {
-        // return -1;
-    }
+
+    nodes[nodeIdx].children.push_back(upperBound);
 
     if (!readToken(TokenType::RPAREN)) {
         return -1;
@@ -562,10 +570,11 @@ int Parser::parseFornLoop() {
     if (!readToken(TokenType::LBRACE)) {
         return -1;
     }
-    
-    int cond = parseBlock();
-    if(cond == -1) return cond;
-    else nodes[nodeIdx].children.push_back(cond);
+
+    int blockNode = parseBlock();
+    if (blockNode == -1) return -1;
+
+    nodes[nodeIdx].children.push_back(blockNode);
 
     if (!readToken(TokenType::RBRACE)) {
         return -1;
@@ -578,40 +587,33 @@ int Parser::parseCout() {
     int nodeIdx = createNode();
     nodes[nodeIdx].type = "COUT";
 
-    // We've already matched COUT in parseStatement()
     if (!readToken(TokenType::COUT)) {
         return -1;
     }
 
-    // Expect '(' after cout
     if (!readToken(TokenType::LPAREN)) {
         return -1;
     }
 
-    // Parse exactly one argument
     int argIdx = parseExpression();
     if (argIdx == -1) {
         return -1; 
     }
 
-    // Verify that the argument is either an IDENTIFIER or a STRING_LITERAL node
     std::string argType = nodes[argIdx].type;
     if (argType != "IDENTIFIER" && argType != "STRING_LITERAL") {
         std::cerr << "ERROR: cout can only print a variable or a string literal\n";
         return -1;
     }
 
-    // Expect closing parenthesis
     if (!readToken(TokenType::RPAREN)) {
         return -1;
     }
 
-    // Expect semicolon
     if (!readToken(TokenType::SEMICOLON)) {
         return -1;
     }
 
-    // Add the single argument as a child of COUT node
     nodes[nodeIdx].children.push_back(argIdx);
 
     return nodeIdx;
