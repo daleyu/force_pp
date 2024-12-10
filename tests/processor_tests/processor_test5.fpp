@@ -3,4 +3,5 @@ int solve(int a){
     int x = 8;
     int y = 8
     result = a;
+    cout(result);
 }

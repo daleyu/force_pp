@@ -17,7 +17,7 @@
 #include "../processor/processor.h"
 
 // Test function declarations
-void run_processor_test(const std::string& input_file);
+std::string run_processor_test(const std::string& input_file);
 void test_program1();
 void test_program2();
 void test_program3();
@@ -51,7 +51,7 @@ std::string readFile(const std::string& filename) {
 }
 
 
-void run_processor_test(const std::string& input_file) {
+std::string run_processor_test(const std::string& input_file) {
     std::cout << "\nRunning test: " << input_file << std::endl;
     
     std::string program = readFile(input_file);
@@ -97,25 +97,31 @@ void run_processor_test(const std::string& input_file) {
     std::string result = exec(run_cmd.c_str());
 
     std::cout << "Test output:\n" << result;
+    return result;
 
 }
 void test_program1() {
-    run_processor_test("tests/processor_tests/processor_test1.fpp");
+    std::string result = run_processor_test("tests/processor_tests/processor_test1.fpp");
+    //compare result with 10
+    assert(result == "10\n");
     std::cout << "Processor Test 1 completed successfully.\n";
 }
 
 void test_program2() {
-    run_processor_test("tests/processor_tests/processor_test2.fpp");
+    std::string result = run_processor_test("tests/processor_tests/processor_test2.fpp");
+    assert(result == "0\n");
     std::cout << "Processor Test 2 completed successfully.\n";
 }
 
 void test_program3() {
-    run_processor_test("tests/processor_tests/processor_test3.fpp");
+    std::string result = run_processor_test("tests/processor_tests/processor_test3.fpp");
+    assert(result == "45\n");
     std::cout << "Processor Test 3 completed successfully.\n";
 }
 
 void test_program4() {
-    run_processor_test("tests/processor_tests/processor_test4.fpp");
+    std::string result = run_processor_test("tests/processor_tests/processor_test4.fpp");
+    assert(result == "5\n");
     std::cout << "Processor Test 4 completed successfully.\n";
 }
 
