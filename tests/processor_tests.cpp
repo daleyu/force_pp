@@ -81,27 +81,23 @@ void run_processor_test(const std::string& input_file) {
     Processor processor(parser.nodes, output_filename);
     processor.process();
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        // Wait for the file to be written to disk
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     std::string exe_name = input_file.substr(0, input_file.find_last_of('.')) + "_exe";
+    std::cout << "outfile: " << output_filename << std::endl;
+    // int compile_result = system(("g++ -std=c++17 tests/processor_tests/processor_test1.cpp -o " + exe_name).c_str());
+    int compile_result = system(("g++ -std=c++17 " + output_filename + " -o " + exe_name).c_str());
+    if (compile_result != 0) {
+        throw std::runtime_error("Compilation failed for: " + output_filename);
+    }
 
+    std::string run_cmd = "./" + exe_name;
+    std::cout << "Running executable: " << run_cmd << std::endl;
+    std::string result = exec(run_cmd.c_str());
 
-    // std::string compile_cmd = "g++ -Wall -std=c++17 " + output_filename + " -o " + 
-    //                         "test_exe";
-    
-    // std::cout << "\nExecuting compilation command: " << compile_cmd << std::endl;
-    
-    // int compile_result = system(compile_cmd.c_str());
-    // if (compile_result != 0) {
-    //     throw std::runtime_error("Compilation failed for: " + output_filename +
-    //                             "\nCommand used: " + compile_cmd);
-    // }
+    std::cout << "Test output:\n" << result;
 
-    // std::string result = exec(("./" + input_file.substr(0, input_file.find_last_of('.')) + "_exe").c_str());
-    // std::cout << "Test output:\n" << result;
-
-    // std::string expected_output = "Hello, world!\n";
-    // assert(result == expected_output);
 }
 void test_program1() {
     run_processor_test("tests/processor_tests/processor_test1.fpp");

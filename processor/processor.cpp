@@ -290,6 +290,7 @@ void Processor::process() {
 	dfs(0);
 
 	outfile << "int main() {\nint t = 1;\nif (multiTest) cin >> t;\nfor (int ii = 0; ii < t; ii++) {solve(ii);} \n return 0;\n}";
-
+    outfile.flush();
+    outfile.close();
 
 }
