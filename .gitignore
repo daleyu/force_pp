@@ -45,3 +45,11 @@ tests/processor_tests/processor_test1_exe
 tests/processor_tests/processor_test2_exe
 tests/processor_tests/processor_test3_exe
 tests/processor_tests/processor_test4_exe
+tests/processor_tests/processor_test5_exe
+
+
+tests/processor_tests/processor_test1.cpp
+tests/processor_tests/processor_test2.cpp
+tests/processor_tests/processor_test3.cpp
+tests/processor_tests/processor_test4.cpp
+tests/processor_tests/processor_test5.cpp
