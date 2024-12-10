@@ -109,6 +109,53 @@ void Processor::dfs(int cur) {
 	    return;
 	}
 
+    if(nodes[cur].type == "FORN"){
+        outfile << "for(";
+        if(nodes[cur].children.size() != 3) {
+            std::cout << "ERROR: bad function node" << std::endl;
+            return;
+        }
+        int child1 = nodes[cur].children[0];
+        int child2 = nodes[cur].children[1];
+        int child3 = nodes[cur].children[2];
+
+        //forn(i, n) { //iterate i from 0 to n-1, equal to for(int i = 0; i < n;
+        //i++) 
+        outfile << "int " << nodes[child1].name << " = 0; ";
+        outfile << nodes[child1].name << " < ";
+        dfs(child2);
+        outfile << "; ";
+        outfile << nodes[child1].name << "++){\n";
+        for(int z : nodes[child3].children) {
+            dfs(z);
+            if(needsLine(nodes[z].type)) outfile << ';';
+            outfile << '\n';
+        }
+        outfile << "}";
+        return;
+    }
+
+    if(nodes[cur].type == "WHILE") {
+        outfile << "while(";
+        if(nodes[cur].children.size() != 2) {
+            std::cout << "ERROR: bad function node" << std::endl;
+            return;
+        }
+        int child1 = nodes[cur].children[0];
+        int child2 = nodes[cur].children[1];
+        dfs(child1);
+        outfile << "){\n";
+
+        for(int z: nodes[child2].children) {
+            dfs(z);
+            if(needsLine(nodes[z].type)) outfile << ';';
+            outfile << '\n';
+        }
+        outfile << "}";
+        return;
+
+    }
+
 	if(nodes[cur].type == "DECLARATION") {
 		outfile << nodes[cur].varType << ' ' << nodes[cur].name;
 
@@ -130,6 +177,18 @@ void Processor::dfs(int cur) {
 		}
 	    return;
 	}
+
+    if(nodes[cur].type == "POSTFIX OPERATOR") {
+        if(nodes[cur].children.size() != 1) {
+            std::cout << "ERROR: bad function node" << std::endl;
+            return;
+        }
+        // For postfix operators like i++, the operand (child) should come first
+        dfs(nodes[cur].children[0]);
+        outfile << nodes[cur].name; // Print the '++' after the operand
+        return;
+    }
+
 
 	if(nodes[cur].type == "RETURN") {
 		outfile << "return ";
@@ -177,6 +236,29 @@ void Processor::dfs(int cur) {
 	    return;
 	}
 
+    if(nodes[cur].type == "COUT") {
+        if(nodes[cur].children.size() != 1) {
+            std::cout << "ERROR: COUT node should have exactly one child.\n";
+            return;
+        }
+
+        outfile << "std::cout << ";
+        int child = nodes[cur].children[0];
+
+        if (nodes[child].type == "IDENTIFIER") {
+            outfile << nodes[child].name;
+        } else if (nodes[child].type == "STRING_LITERAL") {
+            // If parser puts the quotes in nodes[child].name:
+            outfile << nodes[child].name;
+        } else {
+            std::cout << "ERROR: COUT node child is neither IDENTIFIER nor STRING_LITERAL.\n";
+            return;
+        }
+
+        outfile << " << '\\n'";
+        return;
+    }
+
 
 
 
@@ -207,7 +289,7 @@ void Processor::process() {
 	outfile << "ll d, l, r, k, n, m, p, q, u, v, w, x, y, z;\n";
 	dfs(0);
 
-	outfile << "int main() {\nint t = 1;\nif (multiTest) cin >> t;\nfor (int ii = 0; ii < t; ii++) {solve(ii);}\n}";
+	outfile << "int main() {\nint t = 1;\nif (multiTest) cin >> t;\nfor (int ii = 0; ii < t; ii++) {solve(ii);} \n return 0;\n}";
 
 
 }

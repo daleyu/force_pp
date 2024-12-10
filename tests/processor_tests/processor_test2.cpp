@@ -21,11 +21,12 @@ int result = (x + y);
 int z = ((x * y) + (x / y));
 bool flag = ((((x == y) && x) != z) || !flag);
 result = (func1(x,y) * func2(z));
-print(result);
+std::cout << result << '\n';
 }
 
 int main() {
 int t = 1;
 if (multiTest) cin >> t;
-for (int ii = 0; ii < t; ii++) {solve(ii);}
+for (int ii = 0; ii < t; ii++) {solve(ii);} 
+ return 0;
 }

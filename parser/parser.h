@@ -64,6 +64,7 @@ public:
     int parseIfStatement();
     int parseReturnStatement();
     int parseBlock();
+    int parseCout();
 //     std::vector<std::unique_ptr<Expression> > parseExpressionList(TokenType end);
     int parseExpression(int precedence = 0);
     
