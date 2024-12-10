@@ -3,4 +3,6 @@ int solve(int a){
     while (y > 5){
         y = y - 1;
     }
+    cout(y);
+    return y;
 }

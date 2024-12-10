@@ -5,5 +5,6 @@ int solve(int a) {
         result = result + i;
 	}	
 
+    cout(result);
     return result;
 }

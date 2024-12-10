@@ -10,9 +10,7 @@ Needs GCC installed to compile in c++17.
 To run tests on Linux/Mac:
 ./run_tests.sh
 
-To build and lex any file:
-1. make main
-2. ./main file_name 
+**Scroll down to Homework 3 Components at the bottom! Thanks!**
 
 
 # Homework 1 Components (Tag v0.1-lexer)
@@ -142,7 +140,8 @@ You can find our parsing algorithm in `./parser`.
 *How our Parsing algorithm works*
 Our parser is a recursive descent parser. And it’s a “top down operator precedence” parser, sometimes called “Pratt parser”.
 
-- Our algorthim works
+- Our algorthim works through a Pratt Parser. It basically just keeps trying to
+  like recursively match the statements and backs off when it can't.
 
 ### Sample Input Programs
 Our sample input programs can be found in `/test-files/parser_tests` The first 4 are different features and parsing nesting for force_pp. The last 
@@ -166,8 +165,67 @@ Please use the youtube link. The videos couldn't be added to the repo cause they
 For the deliverables, you can read the above portions and inspect our files in parser and ast. We also have the test files in tests. Thanks!
 Look at this youtube link to watch the demo: https://www.youtube.com/watch?v=HVJFjCcfCzY
 
+# Homework 3 Components
 
-##### References 
+*Requirements*
+You still only need GCC installed to compile in c++17. If you have issues using
+a Windows's Machines' Visual Studio C++ compiler, then try a MacOS or Linux
+computer's clang compiler. 
+
+You still can run all the tests need through doing 
+`./run_tests.sh` or if you are on fish then `bash ./run_tests.sh`
+
+### Processor Algorithm
+
+Our algorithm works by implementing a recursive depth-first search algorithm on
+the Abstract Syntax Tree (AST) that we generated in the previous section. It
+then will take the input code from force++ and then convert it into the proper
+C++ code.
+- The algorithm basically traverses each node of the AST, and then depending on
+  the node type (like FUNCTION, FOR, WHILE, etc.), it will output the
+  corresponding C++ syntax to an output file. Each one of these nodes will have
+  children that might need to be recursively called on. So, if necessary, the
+  DFS will continue to call the children recursively to maintain the correct
+  code structure. 
+- Beyond the normal recursive calls based on the AST, there are optimizations
+  and shortcuts based on the special syntax. For instance, there is the
+  forn(i,n) loop which gets converted into native, standard C++ for loop with
+  the syntax of (for(inti = 0; i < n; i++ )). There is also cout() as a method,
+  so you can just quickly print and debug variables and strings.
+- Our processor also adds in the necessary C++ boilerplate code automatically,
+  so that you can immediately have the basic packages for comp programming
+  already there.
+
+> Find these files is the processor folder
+
+##### Input Programs
+
+ You can look at the video to see the different input programs that we are
+ testing. You can also look in the `tests/processor_tests/` folder to see the
+ different sample files that we are compiling. You can also see what the testing
+ code is doing if you want by loooking at `tests/processor_tests.cpp`.
+
+ - The tests will compile it to C++ and then execute the said C++ code.
+ - If there are parsing or syntax errors then it will throw an error and return
+   that to the user. It does not try to run code that has errors.
+ - Our code covers, while, for, forn, function definitions, many types, and many
+   shortcuts,
+ - Our 5th test, as shown in the video, has a syntax error which results in the
+   user seeing where and what that error was. What was expected, and what it
+   got.
+ - For simplifications, we have a forn() loop which gets rid of extra code, we
+   also have shortcuts like cout() and other simplifications.
+
+#### Demo:
+
+You can use the youtube link here. It is an unlisted Youtube video, so this link
+should work. Let me know if it doesn't. The rest of the deliverables you can
+find above.
+https://youtu.be/N7BNVxxCUII
+
+---
+
+##### References
 
 Collection of popular macros in comp programming: https://gist.github.com/abinashmeher999/e5993d17e9d25227cbe3#file-comp_macros-h-L3
 
