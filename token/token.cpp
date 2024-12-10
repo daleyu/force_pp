@@ -15,7 +15,9 @@ std::string TokenTypeToString(TokenType type) {
         case TokenType::BOOLEAN_LITERAL: return "BOOLEAN_LITERAL";
         case TokenType::ASSIGN: return "ASSIGN";
         case TokenType::PLUS: return "PLUS";
+        case TokenType::PLUSPLUS: return "PLUSPLUS";
         case TokenType::MINUS: return "MINUS";
+        case TokenType::MINUSMINUS: return "MINUSMINUS";
         case TokenType::BANG: return "BANG";
         case TokenType::ASTERISK: return "ASTERISK";
         case TokenType::SLASH: return "SLASH";

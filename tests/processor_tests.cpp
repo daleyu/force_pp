@@ -4,9 +4,12 @@
 #include <fstream>
 #include <cassert>
 #include <cstdio>
+#include <cstdlib>
 #include <memory>
 #include <stdexcept>
 #include <array>
+#include <chrono>
+#include <thread>
 
 #include "../parser/parser.h"
 #include "../lexer/lexer.h"
@@ -14,7 +17,7 @@
 #include "../processor/processor.h"
 
 // Test function declarations
-void run_processor_test(const std::string& input_file);
+std::string run_processor_test(const std::string& input_file);
 void test_program1();
 void test_program2();
 void test_program3();
@@ -34,6 +37,7 @@ static std::string exec(const char* cmd) {
     }
     return result;
 }
+
 std::string readFile(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -47,7 +51,7 @@ std::string readFile(const std::string& filename) {
 }
 
 
-void run_processor_test(const std::string& input_file) {
+std::string run_processor_test(const std::string& input_file) {
     std::cout << "\nRunning test: " << input_file << std::endl;
     
     std::string program = readFile(input_file);
@@ -63,9 +67,13 @@ void run_processor_test(const std::string& input_file) {
 
     Parser parser(tokens);
     parser.parseProgram();
+
     std::vector<std::string> errors = parser.Errors();
     for (const std::string &error : errors) {
         std::cerr << "Parse error: " << error << '\n';
+    }
+    if (errors.size() > 0) {
+        throw std::runtime_error("Parser errors encountered.");
     }
     assert(errors.empty());
 
@@ -73,34 +81,47 @@ void run_processor_test(const std::string& input_file) {
     Processor processor(parser.nodes, output_filename);
     processor.process();
 
-    int ret = system("g++ test.cpp -o test_exe");
-    if (ret != 0) {
-        std::cerr << "Compilation of " << output_filename << " failed!\n";
-        return;
+        // Wait for the file to be written to disk
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    std::string exe_name = input_file.substr(0, input_file.find_last_of('.')) + "_exe";
+    std::cout << "outfile: " << output_filename << std::endl;
+    // int compile_result = system(("g++ -std=c++17 tests/processor_tests/processor_test1.cpp -o " + exe_name).c_str());
+    int compile_result = system(("g++ -std=c++17 " + output_filename + " -o " + exe_name).c_str());
+    if (compile_result != 0) {
+        throw std::runtime_error("Compilation failed for: " + output_filename);
     }
 
-    std::string result = exec("./test_exe");
+    std::string run_cmd = "./" + exe_name;
+    std::cout << "Running executable: " << run_cmd << std::endl;
+    std::string result = exec(run_cmd.c_str());
+
     std::cout << "Test output:\n" << result;
-    // std::string expected_output = "Hello, world!\n";
-    // assert(result == expected_output);
+    return result;
+
 }
 void test_program1() {
-    run_processor_test("tests/processor_tests/processor_test1.fpp");
+    std::string result = run_processor_test("tests/processor_tests/processor_test1.fpp");
+    //compare result with 10
+    assert(result == "10\n");
     std::cout << "Processor Test 1 completed successfully.\n";
 }
 
 void test_program2() {
-    run_processor_test("tests/processor_tests/processor_test2.fpp");
+    std::string result = run_processor_test("tests/processor_tests/processor_test2.fpp");
+    assert(result == "0\n");
     std::cout << "Processor Test 2 completed successfully.\n";
 }
 
 void test_program3() {
-    run_processor_test("tests/processor_tests/processor_test3.fpp");
+    std::string result = run_processor_test("tests/processor_tests/processor_test3.fpp");
+    assert(result == "45\n");
     std::cout << "Processor Test 3 completed successfully.\n";
 }
 
 void test_program4() {
-    run_processor_test("tests/processor_tests/processor_test4.fpp");
+    std::string result = run_processor_test("tests/processor_tests/processor_test4.fpp");
+    assert(result == "5\n");
     std::cout << "Processor Test 4 completed successfully.\n";
 }
 

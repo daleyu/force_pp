@@ -1,3 +1,8 @@
-int x = 8;
-int y = 8;
-result = x + y;
+int solve(int a){
+    int y = 10;
+    while (y > 5){
+        y = y - 1;
+    }
+    cout(y);
+    return y;
+}
